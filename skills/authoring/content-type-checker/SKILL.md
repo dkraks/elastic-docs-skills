@@ -1,6 +1,6 @@
 ---
 name: docs-content-type-checker
-version: 2.1.0
+version: 2.1.1
 description: Check a docs-content page against Elastic content type guidelines (overview, how-to, tutorial, troubleshooting, changelog). Use when the user asks to check content type compliance, validate page structure, or review a doc against content type standards.
 argument-hint: <file-or-directory>
 context: fork
@@ -79,7 +79,7 @@ Use these current checklists as the minimum review criteria:
 ### Shared frontmatter and metadata
 
 - **Filename**: Matches the content type pattern when one exists.
-- **Frontmatter**: Includes `applies_to`, `description`, and the repo's canonical product metadata field. In docs-content, use `products`, not `product`.
+- **Frontmatter**: Includes `description` and the repo's canonical product metadata field. In docs-content, use `products`, not `product`.
 - **Title**: Matches the content type intent, uses sentence case, and is specific enough for search and navigation.
 - **Introduction**: Helps readers confirm that the page matches their goal.
 
@@ -132,7 +132,6 @@ When the inferred type differs from the declared `type`, report the mismatch fir
 ### Detected type: <type>
 
 ### Required elements
-- ✅ Frontmatter `applies_to`: Present
 - ❌ Frontmatter `description`: Missing
 - ✅ Title: Present, uses correct pattern
 - ...

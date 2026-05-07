@@ -1,8 +1,9 @@
 ---
 name: docs-fix-changelog
-version: 1.0.1
+version: 1.0.2
 description: Suggest improved text for weak or missing fields in Elastic changelog YAML files. Accepts optional PR or issue context (title, description, diff, linked issues) to produce better suggestions. Use after docs-review-changelog identifies quality issues, or when drafting a new changelog from a PR or issue.
 argument-hint: "[changelog-file] [pr/issue-context]"
+context: fork
 allowed-tools: Read, Grep, Glob
 sources:
   - https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs
