@@ -1,6 +1,6 @@
 ---
 name: docs-check-style
-version: 1.1.0
+version: 1.1.1
 description: Check documentation for Elastic style guide compliance using Vale linter output and style rules. Use when writing, editing, or reviewing docs to catch voice, tone, grammar, formatting, accessibility, and word choice issues.
 argument-hint: <file-or-directory>
 context: fork
@@ -43,7 +43,7 @@ Use the Elastic docs MCP `get_document_by_url` tool with `includeBody: true` to 
 
 ## Step 2: Run Vale
 
-Try the Vale MCP tool first (`vale_lint`). If unavailable, fall back to the CLI:
+Run the Vale CLI:
 
 ```
 vale --output=line $ARGUMENTS

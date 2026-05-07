@@ -37,12 +37,12 @@
     },
     {
       "id": 4,
-      "prompt": "Check this overview page against the content type guidelines:\n\n---\ntype: overview\nproducts:\n  - id: elasticsearch\ndescription: Learn how index lifecycle management automates index transitions to optimize storage and performance.\napplies_to:\n  stack: ga\n---\n\n# Index lifecycle management\n\nIndex lifecycle management automates transitions through lifecycle phases.\n\n## Create a policy\n\n1. Open **Stack Management**.\n2. Click **Create policy**.",
+      "prompt": "Check this overview page against the content type guidelines:\n\n---\ntype: overview\nproducts:\n  - id: elasticsearch\ndescription: Learn how index lifecycle management automates index transitions to optimize storage and performance.\n---\n\n# Index lifecycle management\n\nIndex lifecycle management automates transitions through lifecycle phases.\n\n## Create a policy\n\n1. Open **Stack Management**.\n2. Click **Create policy**.",
       "expected_output": "Report that the declared overview contains how-to content and should move step-by-step instructions to a how-to guide or link to one",
       "expectations": [
         "Recognizes the declared type as overview",
         "Flags numbered procedural steps as an overview anti-pattern",
-        "Checks shared frontmatter using products, not product singular",
+        "Checks shared metadata using products, not product singular",
         "Suggests keeping the overview conceptual and linking to a how-to guide"
       ]
     },

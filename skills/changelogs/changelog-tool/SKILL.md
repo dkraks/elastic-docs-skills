@@ -1,7 +1,8 @@
 ---
 name: docs-changelog-tool
-version: 1.0.2
+version: 1.0.3
 description: Use before adding CLI options or profile fields, changing filter mechanisms, modifying the entry or bundle schema, updating the {changelog} directive or changelog render, or adding and modifying tests in docs-builder changelog commands.
+context: fork
 allowed-tools: Read, Grep, Glob, Edit, Bash
 ---
 <!-- Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
