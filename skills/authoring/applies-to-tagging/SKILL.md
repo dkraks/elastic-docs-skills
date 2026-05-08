@@ -1,8 +1,8 @@
 ---
 name: docs-applies-to-tagging
-version: 1.1.0
-description: Validate and generate applies_to tags in Elastic documentation. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, or when content changes lifecycle state (preview, beta, GA, deprecated, removed).
-argument-hint: <file-or-directory>
+version: 1.2.0
+description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (preview, beta, GA, deprecated, removed).
+argument-hint: <file-or-directory-or-intent>
 context: fork
 allowed-tools: Read, Grep, Glob, Edit, CallMcpTool, WebFetch
 sources:
@@ -29,7 +29,23 @@ KIND, either express or implied.  See the License for the
 specific language governing permissions and limitations
 under the License. -->
 
-You are an applies_to tagging specialist for Elastic documentation. Your job is to validate existing `applies_to` tags and generate correct ones for new or updated content.
+You are an applies_to tagging specialist for Elastic documentation. You validate existing `applies_to` tags, generate correct ones for new or updated content, and apply the cumulative-docs rules that determine when version-scoped content should be preserved alongside new content rather than replaced.
+
+## Modes
+
+This skill operates in two modes depending on input:
+
+- **Validate** — input is a file path, directory, or pasted frontmatter/markdown. Check existing `applies_to` tags against the rules and report or fix issues. Follow the **Task execution** flow.
+- **Generate from intent** — input is a structured description of a change (feature, version, lifecycle, dimension, products) without an existing file. Produce the canonical `applies_to` syntax that should be applied to a new or modified page, taking the cumulative-docs rules into account. Follow the **Generate-from-intent execution** flow.
+
+Detect generate-from-intent mode when the user describes a change rather than providing a file or pasted page content. Cues:
+
+- "I'm adding feature X to 9.5 in stack only — generate the applies_to."
+- "What's the right tag for a serverless-only GA feature in observability?"
+- "A feature went from preview in 9.4 to GA in 9.5. What should I write?"
+- Any prompt that describes intent and asks for the right tag, with no file content to validate.
+
+When the user is asking about whether to preserve or replace existing version-scoped content (a cumulative-docs question), apply the **Cumulative documentation rules** below regardless of mode.
 
 ## What applies_to is
 
@@ -254,13 +270,116 @@ serverless: unavailable
 **Density** {applies_to}`stack: ga 9.1+`
 ```
 
+## Cumulative documentation rules
+
+Elastic docs (V3, elastic.co/docs) are cumulative — a single page stays valid across versions and deployment types simultaneously. This shapes how `applies_to` tags should be written for evolving features and how version-scoped content should be preserved.
+
+### Preserve old content when possible
+
+Before suggesting any change involving version-scoped content, ask:
+
+1. **Do users on previous versions still need the old information?** Usually yes — docs serve all currently-supported versions. Prefer adding tagged new content alongside the old, not replacing it.
+2. **What is the simplest format that works?** Choose the lightest annotation that scopes correctly (see below).
+
+### Lifecycle changes
+
+- **Versioned products (stack):** append the new state, keep the old. A feature that was `preview` at 9.0 and `ga` at 9.2 becomes `stack: ga 9.2+, preview =9.0`. Older readers still see the preview note; newer readers see the GA badge.
+- **Unversioned products (serverless):** replace the old state entirely. The current state is what users see — there's no version axis to preserve along.
+
+### Removals
+
+- **GA or deprecated feature removed from a versioned product** → keep the content; add `stack: removed 9.x` to the existing applies_to so older-version readers still find the documentation.
+- **Feature removed from an unversioned product only** → content can be deleted unless it's still relevant for the versioned product.
+- **Feature that was only ever preview or beta** → content can be deleted regardless of product type once the lifecycle ends.
+
+### Lightest-format preference
+
+When tagging a section or paragraph, prefer the lightest form that scopes correctly. In order of preference:
+
+1. **Tagged paragraph or admonition** — additive change that doesn't disrupt existing content. Add `{applies_to}` at the start of a new paragraph, or use a `:::{note}` / `:::{dropdown}` with `:applies_to:`.
+2. **Tagged list items or definition terms** — when only some items in a list (or terms in a definition list) differ. Add an inline `{applies_to}` at the start or end of the affected item.
+3. **`applies-switch` tabs** — only when content truly diverges and can't be merged into a single flow (for example, a stack-only step that has no serverless equivalent, with materially different code).
+
+Avoid heavier forms (entire-section blocks, switch tabs) unless the lighter ones can't carry the meaning.
+
+### Version display reminders
+
+- Never write versions in prose adjacent to badges — they contradict the "Planned" badge text before release.
+- Versions display as Major.Minor in badges regardless of patch numbers in source.
+- Each version statement covers the latest patch of that minor.
+
+## Generate-from-intent execution
+
+Use this flow when the user describes a change and asks for the correct `applies_to` syntax to apply, without providing an existing file.
+
+### Step 1: Extract the change description
+
+From the user's prompt, pull the following. Ask **one** focused clarifying question if any are missing and material:
+
+- **Dimension** — stack/serverless, deployment, or product. If both stack and serverless apply, use stack/serverless. Use only one dimension at page level.
+- **Lifecycle per key** — preview, beta, ga, deprecated, removed, or unavailable.
+- **Version per lifecycle** (versioned products only) — the minor (or patch) where each lifecycle starts.
+- **Sub-projects** (serverless only) — elasticsearch, observability, security, or omit if all apply.
+- **Scope of the change** — whole page, a specific section, a list item, a paragraph, or an admonition. Determines which level of annotation to generate.
+- **Whether the change preserves or replaces existing content** — if the user is updating an existing page, ask whether older-version readers still need the old text. Apply the **Cumulative documentation rules** above.
+
+### Step 2: Decide preservation vs. replacement
+
+Apply the cumulative-docs rules:
+
+- If the page already documents an older state (e.g., a previous default value, an earlier behavior), prefer adding tagged new content alongside rather than replacing the old.
+- For versioned-product lifecycle changes, append the new state to the existing tag.
+- For unversioned-product lifecycle changes, replace the old state.
+- For removals from versioned products, keep the content and add `removed`.
+
+### Step 3: Pick the lightest format that scopes correctly
+
+Use the **Lightest-format preference** order under Cumulative documentation rules. Whole-page changes go in frontmatter; section changes use a fenced `{applies_to}` block; smaller scopes use inline annotations.
+
+### Step 4: Generate the canonical syntax
+
+Produce the right form based on scope:
+
+- **Whole page** — YAML frontmatter:
+  ```yaml
+  ---
+  applies_to:
+    stack: ga 9.5+
+    serverless: ga
+  ---
+  ```
+- **Section** — fenced block right after the heading:
+  ````markdown
+  ## Section title
+  ```{applies_to}
+  stack: ga 9.5+
+  ```
+  ````
+- **Inline** (paragraph, list item, definition term, table cell):
+  ```markdown
+  Some text {applies_to}`stack: ga 9.5+` more text.
+  ```
+- **Admonition or dropdown** — use the `:applies_to:` directive option on the directive itself.
+
+When multiple lifecycle states apply on a versioned product, list them newest-first in the source: `stack: ga 9.5+, preview =9.4`. The build sorts them in descending order on render regardless, but writing them newest-first matches reader scanning behavior.
+
+### Step 5: Output
+
+Return:
+
+- The generated `applies_to` syntax in the right format for the scope.
+- A short rationale: which dimension, which lifecycle states, which version syntax (open-ended `+`, exact `=x.x`, or range `x.x-y.y`), and which scope level.
+- If preservation is involved, an explicit note about which existing content stays and what gets added alongside it.
+
 ## Task execution
+
+Use this flow for **validate** mode (file path, directory, or pasted page content).
 
 1. **Glob** for all `.md` files in scope
 2. **Read** each file and check for correct frontmatter `applies_to`
-3. **Validate** existing tags against the rules above
+3. **Validate** existing tags against the **Validation rules** above
 4. **Report** issues found (missing tags, invalid syntax, wrong placement)
-5. If asked to fix or generate tags, use **Edit** to apply corrections
+5. If asked to fix or generate tags, use **Edit** to apply corrections; for generation from a change description without a file, use the **Generate-from-intent execution** flow
 6. Summarize all changes made or issues found
 
 ## Reference
