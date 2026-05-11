@@ -1,8 +1,9 @@
 ---
 name: docs-syntax-help
-version: 1.0.4
+version: 1.0.6
 description: Provide Elastic Docs syntax guidance, troubleshoot markup issues, and help write directives correctly. Use when writing or editing documentation that uses MyST Markdown with Elastic extensions, or when troubleshooting build errors related to syntax.
 argument-hint: <question-or-directive>
+context: fork
 allowed-tools: Read, Grep, Glob, Edit, WebFetch
 sources:
   - https://www.elastic.co/docs/contribute-docs/syntax-quick-reference
@@ -75,7 +76,7 @@ Content
 
 ### Literal blocks inside directives
 
-Code blocks and `applies_to` blocks use **backtick fences** (not colons) to prevent Markdown processing:
+Code blocks use **backtick fences** (not colons) to prevent Markdown processing:
 
 ````
 :::{note}
@@ -83,16 +84,6 @@ Code blocks and `applies_to` blocks use **backtick fences** (not colons) to prev
 key: value
 ```
 :::
-````
-
-Section-level `applies_to` uses backtick fences:
-
-````
-## Heading
-
-```{applies_to}
-stack: ga 9.1
-```
 ````
 
 ## Admonitions
@@ -120,17 +111,6 @@ Users could permanently lose data or leak sensitive information.
 Plain callout with a custom title and no severity styling.
 :::
 ```
-
-Admonitions support `applies_to`:
-
-```
-:::{note}
-:applies_to: stack: ga 9.1
-This note applies only to Stack 9.1+.
-:::
-```
-
-Object notation for multiple keys: `:applies_to: { ece:, ess: }` or JSON: `:applies_to: {"stack": "ga 9.2", "serverless": "ga"}`.
 
 **Rules**: Do not stack admonitions. Do not place code blocks inside admonitions (use dropdowns or tabs instead if code is long).
 
@@ -255,25 +235,6 @@ Tabs with matching `group` and `sync` values synchronize selection across tab se
 
 **Rules**: Do not nest tabs. Do not split procedures across tabs. Do not use more than 6 tabs. Do not use tabs in dropdowns.
 
-## Applies-switch
-
-Badge-based tabs for deployment/version variants:
-
-```
-::::{applies-switch}
-:::{applies-item} stack: ga 9.0+
-Stack-specific content
-:::
-:::{applies-item} serverless: ga
-Serverless-specific content
-:::
-::::
-```
-
-Multiple conditions: `:::{applies-item} { ece: ga 4.0+, ess: ga }`
-
-All applies switches on a page auto-synchronize.
-
 ## Stepper
 
 Sequential steps for tutorials:
@@ -304,8 +265,6 @@ Collapsed content.
 Expanded content.
 :::
 ```
-
-Supports `:applies_to:` option: `:::{dropdown} Title` + `:applies_to: stack: ga 9.0`.
 
 ## Images
 
@@ -435,7 +394,7 @@ Multi-line: `<!-- ... -->`. Content after `-->` on the same line is not rendered
 
 ## Substitutions
 
-Defined in `docset.yml` or page frontmatter under `sub:`:
+Defined in `docset.yml` under `sub:`:
 
 ```yaml
 sub:
@@ -450,8 +409,6 @@ Usage: `{{product-name}}`
 
 **In code blocks**: Use `subs=true` flag. **Inline code**: Use `` {subs=true}`text {{var}}` `` role.
 
-Global substitutions cannot be redefined in frontmatter (build error).
-
 ## Version variables
 
 Syntax: `{{version.<scheme>}}` (e.g., `{{version.stack}}` → `9.3.0`)
@@ -459,24 +416,6 @@ Syntax: `{{version.<scheme>}}` (e.g., `{{version.stack}}` → `9.3.0`)
 Base version: `{{version.stack.base}}` → first version on V3 docs.
 
 Schemes: `stack`, `ece`, `eck`, `ess`, `esf`, `ecctl`, `curator`, plus APM agents and EDOT variants.
-
-## Frontmatter
-
-```yaml
----
-navigation_title: Short nav label
-description: Page description for SEO (~150 chars)
-applies_to:
-  stack: ga
-  serverless: ga
-products:
-  - id: elasticsearch
-sub:
-  my-var: value
----
-```
-
-All fields are optional. Every page must start with a level-1 heading after frontmatter.
 
 ## File inclusion
 
@@ -585,9 +524,8 @@ Use `* * *` for horizontal rules.
 |---------|-----|
 | Mismatched colon count on nested directives | Outer directive needs more colons than inner |
 | Code block inside admonition uses colons | Use backtick fences for code blocks inside directives |
-| `applies_to` block uses colon fences | Section-level `applies_to` must use backtick fences |
 | Missing space after `%` in comments | Always write `% comment` with a space |
-| Nesting tabs inside tabs | Not supported — flatten or use applies-switch |
+| Nesting tabs inside tabs | Not supported — flatten them |
 | Lists indented 2 spaces | Indent 4 spaces for nesting and content under list items |
 | Images outside toc.yml/docset.yml folder | Move images inside the folder tree |
 | Footnote definitions inside directives | Move to document level |
