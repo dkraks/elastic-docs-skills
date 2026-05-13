@@ -1,7 +1,7 @@
 ---
 name: docs-review-changelog
-version: 1.0.2
-description: Validate and assess the quality of Elastic changelog YAML files. Reports schema errors, content quality issues, and formatting problems by type. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
+version: 1.2.0
+description: Validate and assess the quality of Elastic changelog YAML files against current Elastic standards. Reports schema errors, content quality issues, and systematic pattern violations. Fetches canonical guidance to stay in sync. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
 argument-hint: <file-or-directory>
 context: fork
 allowed-tools: Read, Grep, Glob, WebFetch
@@ -28,19 +28,50 @@ under the License. -->
 
 You are a changelog reviewer for Elastic documentation. Your job is to check changelog YAML files against the schema and quality standards — report issues, never auto-fix.
 
+## How to use this skill
+
+**Purpose:** Quality gatekeeper for changelog YAML files. Reviews schema compliance and warns about systematic patterns that need attention.
+
+**Common workflows:**
+
+- **Review only:** Gate before merge ("check `docs/changelog`") — use when you want to validate files without making changes
+- **Review → fix → review:** *Recommended* for files with many issues. Use the review report as a punch list, then run `docs-fix-changelog` on specific files, then re-run review on the same path before merge
+- **Fix only:** If you already know specific files need wording improvements and want suggestions
+
+**Relationship to `docs-fix-changelog`:**
+
+- This skill **never modifies files** — it only reports issues
+- `docs-fix-changelog` **suggests improvements** for issues found by this skill
+- Both skills check the same systematic patterns but serve different purposes: review warns, fix suggests
+- **Directory support:** This skill supports directories (globs `*.yaml`/`*.yml` automatically)
+- **Optional workflow:** You don't have to run review before fix or vice versa — use whichever fits your needs
+
+**When to run `docs-fix-changelog` after review:** If this review surfaces quality warnings or formatting warnings, `docs-fix-changelog` can provide specific suggestions for improvement.
+
 ## Inputs
 
 `$ARGUMENTS` is a file path or directory to review. If empty, ask the user what to review.
 
-## Step 1: Discover and parse files
+## Step 1: Load canonical guidance (optional but recommended)
+
+To ensure this review aligns with the latest Elastic changelog standards, attempt to fetch the current guidance:
+
+1. **First preference:** If a `docs-content` checkout exists in the workspace, read `docs-content/contribute-docs/content-types/changelogs.md`
+2. **Second preference:** Fetch the published guide at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>
+3. **Fallback:** Use the embedded patterns in this skill (Steps 3-4) if the above sources are unavailable
+
+**Purpose:** This ensures the review warnings match the most current writer guidance. If successful, cross-check key patterns (title cleanup checklist, technical terms guidance, anti-patterns) against what's embedded in this skill. If there are significant discrepancies, note this in the final summary.
+
+## Step 2: Discover and parse files
 
 Glob for `*.yaml` and `*.yml` in `$ARGUMENTS`, or read a single file if given a direct path. Parse each file as YAML. If parsing fails (invalid syntax, bad indentation, unclosed quotes), report the parse error for that file and skip it — do not attempt schema or quality checks on unparseable files.
 
-## Step 2: Schema checks
+## Step 3: Schema checks
 
 These are hard errors. The source of truth for the schema is `ChangelogEntry.cs` linked in `sources`.
 
 **Required fields:**
+
 - `title`: must be present, max 80 characters
 - `type`: must be present, value must be one of: `feature`, `enhancement`, `security`, `bug-fix`, `breaking-change`, `deprecation`, `known-issue`, `docs`, `regression`, `other`
 - `products`: must be present, non-empty array; each entry must have a `product` key
@@ -56,20 +87,51 @@ These are hard errors. The source of truth for the schema is `ChangelogEntry.cs`
 - `feature-id` if present: must be a string — used to associate a change with a unique feature flag
 - `highlight` if present: must be a boolean — marks entries for inclusion in release highlights
 
-**YAML quoting:** Text field values (`title`, `description`, `impact`, `action`) that contain `: ` (colon followed by a space) MUST be wrapped in quotes — an unquoted value containing `: ` is interpreted as the start of a new mapping key and causes a "While scanning a plain scalar value, found invalid mapping" error at bundle time. Also flag unquoted values containing `#`, `[`, `]`, `{`, or `}` as these can also cause parse failures.
+**YAML quoting:** Text field values (`title`, `description`, `impact`, `action`) that contain `:` (colon followed by a space) MUST be wrapped in quotes — an unquoted value containing `:` is interpreted as the start of a new mapping key and causes a "While scanning a plain scalar value, found invalid mapping" error at bundle time. Also flag unquoted values containing `#`, `[`, `]`, `{`, or `}` as these can also cause parse failures.
 
 Example problem: `description: The tool no longer accepts the flag: -c`
 Correct form: `description: "The tool no longer accepts the flag: -c"`
 
-## Step 3: Quality checks
+## Step 4: Quality checks
 
 These are warnings. The source of truth is the changelogs style guidance linked in `sources`.
 
 **All types:**
-- Title starts with a present-tense action verb (`Adds`, `Fixes`, `Improves`, `Removes`, `Updates`…)
+- Title starts with base-form action verb (`Add`, `Fix`, `Improve`, `Remove`, `Update`…) — not third-person forms (`Adds`, `Fixes`)
 - Title is specific, not vague ("Bug fixes" or "Performance improvements" are too vague)
 - Title avoids bare internal references ("PR #123", "bug #456") — these don't help users
 - Title and description avoid implementation-focused language (describe user impact, not code changes)
+
+**Systematic pattern warnings:**
+
+**1. Title standardization issues (from canonical Title cleanup checklist):**
+
+- **Strip development labels:** Remove prefixes such as `feat:`, `fix:`, `Fix:`, `auto-implement:`, and trailing tracker fragments like `Bugfix -`
+- **No bracket-only team tags:** Replace `[Security Solution]`, `[Query Rules]`, `[Inference]`, and similar with plain, user-facing wording
+- **Strong verbs:** Prefer *Improve validation for...* over *Better validation for...* (use present tense imperative: Fix, Add, Remove)
+- **No buried lede:** If title is vague, fold in concrete detail from description so release notes stand alone
+- **Base-form verb requirement:** Use `Fix`, `Add`, `Remove` (not third-person `Fixes`, `Adds`, `Removes`)
+- **Sentence case:** Follow standard sentence capitalization
+
+**2. ES|QL contextual integration issues:**
+- Naked ES|QL or ESQL prefixes in titles: `ESQL: Fix nullify` should be contextual like `Fix nullify in ES|QL`
+- Inconsistent ES|QL format: `ESQL` should be standardized to `ES|QL`
+- When `areas` field already specifies "ES|QL", redundant ES|QL in title
+
+**3. Technical term enhancement issues:**
+- Missing backticks around class/method names, config keys, API endpoints, or code identifiers
+- British spelling that should use US English: `serialise` → `serialize`, `colour` → `color`
+- Unexpanded abbreviations where full form would be clearer: `params` → `parameters`
+
+**4. Content quality issues:**
+- Vague titles that could be more specific based on description content
+- Redundant descriptions that just repeat the title without adding context
+- `UX` terminology that should be `UI` for interface changes
+- Implementation-focused phrasing instead of user-visible outcomes
+
+**5. YAML formatting issues (cross-reference with Step 3):**
+- Unquoted text containing special characters (see Step 3 for details)
+- Inconsistent formatting across text fields
 
 **Type-specific:**
 - `breaking-change`: `impact` and `action` are REQUIRED — flag as errors if absent; `subtype` is strongly recommended
@@ -80,19 +142,28 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - `impact` if present: should explain scope and who is affected
 - `action` if present: should provide clear, prescriptive steps
 
-## Step 4: Formatting checks
+## Step 5: Formatting checks
 
-These are warnings. Check only `description`, `impact`, and `action` field values.
+These are warnings. Check `description`, `impact`, and `action` field values for formatting consistency.
 
+**Link formatting:**
 - Bare URLs used as link text — should use `[descriptive text](url)` instead
-- Code fences without a language identifier — e.g. ` ``` ` with no language tag
-- Field names, config keys, commands, or API endpoints written as plain text — should use inline backticks
+- Generic link text like "click here" or "read more" — should be descriptive of the destination
 
-## Step 5: Report
+**Code formatting:**
+- Code fences without a language identifier — e.g. ` ``` ` with no language tag (use `yaml`, `json`, `bash`, `console`, etc.)
+- Field names, config keys, commands, class names, or API endpoints written as plain text — should use inline backticks
+- Missing backticks around obvious code identifiers like method names, parameter names, or specific values
+
+**Text formatting:**
+- Inconsistent spelling (should follow US English conventions)
+- Inconsistent terminology (`UX` vs `UI` — prefer `UI` for interface changes)
+
+## Step 6: Report
 
 Produce one section per file reviewed. Omit empty sections. Use this format:
 
-```
+```markdown
 ## Changelog review: <filename>
 
 ### Summary
@@ -110,4 +181,6 @@ Produce one section per file reviewed. Omit empty sections. Use this format:
 
 If a file has no issues, say so explicitly.
 
-End with a one-line overall summary across all files reviewed. If any files have quality or formatting warnings, suggest running `docs-fix-changelog` to get suggested improvements.
+End with a one-line overall summary across all files reviewed. If any files have quality warnings (including systematic pattern issues) or formatting warnings, suggest running `docs-fix-changelog` to get specific improvement suggestions that address the same patterns this review identified.
+
+**Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your summary. Note which patterns may need updating and suggest checking the canonical source directly at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>.
