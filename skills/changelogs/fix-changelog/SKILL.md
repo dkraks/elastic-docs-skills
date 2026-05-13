@@ -1,32 +1,18 @@
 ---
-name: docs-fix-changelog
-version: 2.1.0
-description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes confidence scoring and assumption tracking for suggestion transparency. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.
-argument-hint: "[changelog-file-or-directory] [pr/issue-context]"
-context: fork
-allowed-tools: Read, Grep, Glob, WebFetch
-sources:
-  - https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs
-  - https://www.elastic.co/docs/contribute-docs/content-types/changelogs
-  - https://elastic.github.io/docs-builder/syntax/links/
-  - https://elastic.github.io/docs-builder/syntax/code/
----
-<!-- Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
-or more contributor license agreements. See the NOTICE file distributed with
-this work for additional information regarding copyright
-ownership. Elasticsearch B.V. licenses this file to you under
-the Apache License, Version 2.0 (the "License"); you may
-not use this file except in compliance with the License.
-You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+## name: docs-fix-changelog  
+version: 2.0.0  
+description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes confidence scoring and assumption tracking for suggestion transparency. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.  
+argument-hint: "[changelog-file-or-directory] [pr/issue-context]"  
+context: fork  
+allowed-tools: Read, Grep, Glob, WebFetch  
+sources:  
+  - [https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs](https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs)
+  - [https://www.elastic.co/docs/contribute-docs/content-types/changelogs](https://www.elastic.co/docs/contribute-docs/content-types/changelogs)
+  - [https://elastic.github.io/docs-builder/syntax/links/](https://elastic.github.io/docs-builder/syntax/links/)
+  - [https://elastic.github.io/docs-builder/syntax/code/](https://elastic.github.io/docs-builder/syntax/code/)
 
-Unless required by applicable law or agreed to in writing,
-software distributed under the License is distributed on an
-"AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-KIND, either express or implied.  See the License for the
-specific language governing permissions and limitations
-under the License. -->
+
 
 You are a changelog writing assistant for Elastic documentation. You suggest improved text for changelog fields and help draft content for new changelogs. You do not create files — file creation is always done via `docs-builder changelog add`.
 
@@ -51,7 +37,7 @@ This skill pairs with `docs-review-changelog` as part of a systematic changelog 
 To ensure fix suggestions align with the latest Elastic changelog standards, attempt to fetch current guidance:
 
 1. **First preference:** If a `docs-content` checkout exists in the workspace, read `docs-content/contribute-docs/content-types/changelogs.md`
-2. **Second preference:** Fetch the published guide at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>
+2. **Second preference:** Fetch the published guide at [https://www.elastic.co/docs/contribute-docs/content-types/changelogs](https://www.elastic.co/docs/contribute-docs/content-types/changelogs)
 3. **Fallback:** Use the embedded post-edit checklist in this skill (Steps 3-4) if the above sources are unavailable
 
 **Purpose:** This ensures fix suggestions match the most current writer guidance. If successful, cross-check key patterns (title cleanup checklist, technical terms guidance, anti-patterns) against what's embedded in this skill. If there are significant discrepancies, note this in the final output.
@@ -168,17 +154,17 @@ docs-builder changelog add \
   --action "<suggested action>"
 ```
 
-Omit `--impact` and `--action` when not applicable to the type. Note that inside shell-quoted values, backticks must be escaped with a backslash (`` \` ``) and double quotes must be escaped (`\"`).
+Omit `--impact` and `--action` when not applicable to the type. Note that inside shell-quoted values, backticks must be escaped with a backslash (`\``) and double quotes must be escaped (`\"`).
 
 Remind the user that `--products`, `--prs`, `--issues`, and other non-text options must be provided separately. Refer them to `docs-builder changelog add --help` for the full list.
 
 ### Type-specific guidance
 
-- **`breaking-change`**: `impact` must explain what breaks and who is affected; `action` must give ordered, prescriptive migration steps — include code examples if context allows; `subtype` is strongly recommended
-- **`deprecation`**: `action` should name the replacement and link to migration guidance
-- **`feature`** / **`enhancement`**: title and description should answer "what can I now do?" not "what did we build?"
-- **`bug-fix`** / **`regression`**: title should follow "Fix [symptom] in [context]" (base-form verb)
-- **`known-issue`**: include all affected versions and contexts; describe any available workaround in `action`
+- `**breaking-change**`: `impact` must explain what breaks and who is affected; `action` must give ordered, prescriptive migration steps — include code examples if context allows; `subtype` is strongly recommended
+- `**deprecation**`: `action` should name the replacement and link to migration guidance
+- `**feature**` / `**enhancement**`: title and description should answer "what can I now do?" not "what did we build?"
+- `**bug-fix**` / `**regression**`: title should follow "Fix [symptom] in [context]" (base-form verb)
+- `**known-issue**`: include all affected versions and contexts; describe any available workaround in `action`
 
 ## Formatting rules for suggested text
 
@@ -201,11 +187,11 @@ Bad: `description: Removes the --path.home flag: it had no effect`
 
 ### Inline code
 
-Use backticks for field names, parameter names, config keys, API endpoints, commands, and specific values — e.g. `` `index.refresh_interval` ``, `` `POST /_reindex` ``.
+Use backticks for field names, parameter names, config keys, API endpoints, commands, and specific values — e.g. ``index.refresh_interval``, ``POST /_reindex``.
 
 ### Code blocks
 
-- Always include a language identifier: ` ```yaml `, ` ```json `, ` ```bash `, ` ```console `
+- Always include a language identifier: ````yaml`, ````json`, ````bash`, ````console`
 - Use `console` for Elasticsearch API requests — it renders with a Kibana Dev Console link
 - Add `subs=true` when the block contains docs-builder substitution variables
 - Add callouts (`<1>`, `<2>`) only when annotation adds real value; always follow with a matching ordered list
@@ -250,4 +236,4 @@ Use backticks for field names, parameter names, config keys, API endpoints, comm
 
 **Default behavior:** Default behavior is suggest-only. Only apply changes to disk after explicit user confirmation. After writing changes, re-parse YAML to validate the result.
 
-**Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your output. Note which patterns may need updating and suggest checking the canonical source directly at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>.
+**Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your output. Note which patterns may need updating and suggest checking the canonical source directly at [https://www.elastic.co/docs/contribute-docs/content-types/changelogs](https://www.elastic.co/docs/contribute-docs/content-types/changelogs).
