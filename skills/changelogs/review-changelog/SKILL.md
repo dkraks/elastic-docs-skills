@@ -1,7 +1,7 @@
 ---
 name: docs-review-changelog
 version: 1.1.0
-description: Validate and assess the quality of Elastic changelog YAML files against current Elastic standards. Reports schema errors, content quality issues, and systematic pattern violations. Fetches canonical guidance to stay in sync. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
+description: Validate and assess the quality of Elastic changelog YAML files against current Elastic standards. Reports schema errors, content quality issues, systematic pattern violations, and type-title alignment mismatches. Fetches canonical guidance to stay in sync. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
 argument-hint: <file-or-directory>
 context: fork
 allowed-tools: Read, Grep, Glob, WebFetch
@@ -79,6 +79,7 @@ These are hard errors. The source of truth for the schema is `ChangelogEntry.cs`
 **Product ID validation:** Fetch `https://raw.githubusercontent.com/elastic/docs-builder/main/config/products.yml` to get the canonical list — valid IDs are the top-level keys under `products:`. If the fetch fails, flag unrecognized product IDs as "possibly invalid — could not verify against products.yml" rather than as errors.
 
 **Optional field constraints:**
+
 - `products[n].lifecycle` if present on any product entry, fetch `https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/Lifecycle.cs` to get canonical list (such as `ga`)
 - `subtype`: only permitted on `breaking-change` entries; value must be one of: `api`, `behavioral`, `configuration`, `dependency`, `subscription`, `plugin`, `security`, `other`
 - `description` if present: max 600 characters
@@ -133,6 +134,31 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - Unquoted text containing special characters (see Step 2 for details)
 - Inconsistent formatting across text fields
 
+**5. Type-title alignment issues:**
+
+Flag when changelog `type` and `title` verb patterns don't align, indicating potential misclassification:
+
+- **`bug-fix`/`regression` misalignment:** Title uses `Improve`, `Enable`, `Update`, `Enhance` instead of expected `Fix`, `Resolve`, `Correct`
+  - **Warning:** Type suggests fixing broken behavior, but title implies improvement/addition
+  - **Suggest:** Review whether behavior was actually broken or if this should be `enhancement`
+
+- **`enhancement` misalignment:** Title uses `Fix`, `Resolve`, `Correct` instead of expected `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`
+  - **Warning:** Type suggests improving working functionality, but title implies fixing broken behavior
+  - **Suggest:** Review whether behavior was broken (→ `bug-fix`) or truly an optimization (keep `enhancement`)
+
+- **`feature` misalignment:** Title uses `Fix`, `Improve` for substantial new capabilities
+  - **Warning:** Major new functionality should use `Add`, `Introduce`, `Enable`, `Support`
+  - **Suggest:** Review scope - substantial new capability (→ `feature`) vs minor addition (→ `enhancement`)
+
+- **`docs` misalignment:** Title doesn't focus on documentation clarity/accuracy
+  - **Warning:** Documentation changes should use `Update`, `Add`, `Clarify`, `Document`
+
+**Example patterns to flag:**
+
+- Type `bug-fix` + "Improve query approximation accuracy..." → **Flag alignment mismatch**
+- Type `enhancement` + "Fix Painless score scripts..." → **Flag alignment mismatch**  
+- Type `enhancement` + "Fix ES|QL performance issues..." → **Flag alignment mismatch**
+
 **Type-specific:**
 
 - `breaking-change`: `impact` and `action` are REQUIRED — flag as errors if absent; `subtype` is strongly recommended
@@ -185,6 +211,6 @@ Produce one section per file reviewed. Omit empty sections. Use this format:
 
 If a file has no issues, say so explicitly.
 
-End with a one-line overall summary across all files reviewed. If any files have quality warnings (including systematic pattern issues) or formatting warnings, suggest running `docs-fix-changelog` to get specific improvement suggestions that address the same patterns this review identified.
+End with a one-line overall summary across all files reviewed. If any files have quality warnings (including systematic pattern issues and type-title alignment mismatches) or formatting warnings, suggest running `docs-fix-changelog` to get specific improvement suggestions that address the same patterns this review identified.
 
 **Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your summary. Note which patterns may need updating and suggest checking the canonical source directly at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>.

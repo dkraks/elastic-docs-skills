@@ -1,16 +1,15 @@
 ---
-
-## name: docs-fix-changelog  
-version: 2.0.0  
-description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes confidence scoring and assumption tracking for suggestion transparency. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.  
-argument-hint: "[changelog-file-or-directory] [pr/issue-context]"  
-context: fork  
-allowed-tools: Read, Grep, Glob, WebFetch  
-sources:  
-  - [https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs](https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs)
-  - [https://www.elastic.co/docs/contribute-docs/content-types/changelogs](https://www.elastic.co/docs/contribute-docs/content-types/changelogs)
-  - [https://elastic.github.io/docs-builder/syntax/links/](https://elastic.github.io/docs-builder/syntax/links/)
-  - [https://elastic.github.io/docs-builder/syntax/code/](https://elastic.github.io/docs-builder/syntax/code/)
+name: docs-fix-changelog
+version: 2.0.0
+description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes type-title alignment checking to catch systematic misclassifications. Features confidence scoring and assumption tracking for suggestion transparency. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.
+argument-hint: "[changelog-file-or-directory] [pr/issue-context]"
+context: fork
+allowed-tools: Read, Grep, Glob, WebFetch
+sources:
+- https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs
+- https://www.elastic.co/docs/contribute-docs/content-types/changelogs
+- https://elastic.github.io/docs-builder/syntax/links/
+- https://elastic.github.io/docs-builder/syntax/code/
 
 
 
@@ -105,6 +104,54 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 - Quote text containing special characters (backticks, colons, brackets) to prevent parse errors
 - Ensure consistent formatting across text fields
 
+## Step 4.5: Type-Title Alignment Check
+
+**Before generating suggestions**, validate that `type` and `title` verb patterns align. This catches systematic misclassifications where the content doesn't match the declared type.
+
+### Type-Verb Alignment Rules
+
+**`bug-fix` / `regression`:**
+
+- **Expected verbs:** `Fix`, `Resolve`, `Correct`
+- **Expected pattern:** "Fix [symptom] in [context]"
+- **Flag if title uses:** `Improve`, `Enable`, `Update`, `Enhance`
+- **Action:** Suggest either changing type to `enhancement` OR rewriting title to describe what was broken
+
+**`enhancement`:**
+
+- **Expected verbs:** `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`
+- **Expected pattern:** "Improve [capability] for [context]"  
+- **Flag if title uses:** `Fix`, `Resolve`, `Correct`
+- **Action:** Suggest either changing type to `bug-fix` OR rewriting title to focus on improvement/capability
+
+**`feature`:**
+
+- **Expected verbs:** `Add`, `Introduce`, `Enable`, `Support`  
+- **Expected pattern:** "Add [new capability] for [users]"
+- **Flag if title uses:** `Fix`, `Improve` (unless truly new)
+- **Action:** Major new functionality → `feature`. Minor additions → `enhancement`
+
+**`docs`:**
+
+- **Expected verbs:** `Update`, `Add`, `Clarify`, `Document`
+- **Expected pattern:** "Update [documentation] for [clarity/accuracy]"
+
+**`breaking-change` / `deprecation` / `known-issue` / `security`:**
+
+- **Any appropriate verb** but should align with the actual change nature
+- **Focus on clarity** rather than strict verb patterns
+
+### Alignment Assessment Process
+
+For each changelog:
+
+1. **Extract leading verb** from title (first word after articles/prepositions)
+2. **Check against expected verbs** for the declared type
+3. **If mismatch detected**, provide both options:
+   - **Option A:** Keep type, rewrite title with appropriate verb
+   - **Option B:** Keep title, suggest more appropriate type
+4. **Include confidence note** explaining which option is more likely correct based on PR context
+
 ## Step 5: Assess fields
 
 **Mode A & B** — identify fields that need improvement (apply to each file processed):
@@ -137,6 +184,21 @@ Also check for formatting anti-patterns in existing `description`, `impact`, and
 - **Medium confidence:** Technical terms with contextual clues, partial PR context, common Elastic terminology
 - **Low confidence:** Domain-specific terms without context, missing PR details, ambiguous phrasing that could have multiple interpretations, novel or uncommon technical concepts
 
+**Type-Title Alignment Confidence:**
+
+- **High confidence type corrections:**
+  - Clear functional behavior (Fix broken → `bug-fix`)
+  - Clear new capability (Add substantial → `feature`)  
+  - PR context confirms the classification
+
+- **Medium confidence:**
+  - Performance improvements (could be `enhancement` or `bug-fix` depending on whether previous performance was "broken")
+  - Minor additions (could be `enhancement` or `feature` depending on scope)
+
+- **Low confidence - provide both options:**
+  - Ambiguous PR context about whether behavior was broken or just suboptimal
+  - Edge cases between types (e.g., "fixing" by adding a missing capability)
+
 **Mode A & B** — for each weak or malformed field, show:
 
 - Current value (or "not present")
@@ -158,13 +220,50 @@ Omit `--impact` and `--action` when not applicable to the type. Note that inside
 
 Remind the user that `--products`, `--prs`, `--issues`, and other non-text options must be provided separately. Refer them to `docs-builder changelog add --help` for the full list.
 
-### Type-specific guidance
+### Enhanced Type-specific guidance
 
-- `**breaking-change**`: `impact` must explain what breaks and who is affected; `action` must give ordered, prescriptive migration steps — include code examples if context allows; `subtype` is strongly recommended
-- `**deprecation**`: `action` should name the replacement and link to migration guidance
-- `**feature**` / `**enhancement**`: title and description should answer "what can I now do?" not "what did we build?"
-- `**bug-fix**` / `**regression**`: title should follow "Fix [symptom] in [context]" (base-form verb)
-- `**known-issue**`: include all affected versions and contexts; describe any available workaround in `action`
+**`bug-fix` / `regression`:**
+
+- **Title pattern:** "Fix [symptom] in [context]" (base-form verb)
+- **Common misalignment:** Titles that say "Improve" when fixing broken behavior
+- **Resolution:** If behavior was broken → keep `bug-fix`, rewrite title. If adding new capability → change to `enhancement`
+- **Description should explain:** What was wrong, what's now correct
+- **Required fields:** `impact` and `action` recommended for regressions
+
+**`enhancement`:**  
+
+- **Title pattern:** "Improve [existing capability]" or "Add [minor capability]"
+- **Common misalignment:** Titles that say "Fix" for performance improvements
+- **Resolution:** If fixing objectively broken behavior → change to `bug-fix`. If optimizing working functionality → keep `enhancement`, rewrite title
+- **Description should explain:** What users can now do better/faster
+
+**`feature`:**
+
+- **Title pattern:** "Add [substantial new capability]"  
+- **Common misalignment:** Minor improvements labeled as features
+- **Resolution:** Major new functionality → `feature`. Minor additions → `enhancement`
+- **Description should explain:** What users can now do that they couldn't before
+
+**`breaking-change`:**
+
+- **Title pattern:** Any clear verb, but focus on impact clarity
+- **Required fields:** `impact` must explain what breaks and who is affected; `action` must give ordered, prescriptive migration steps — include code examples if context allows; `subtype` is strongly recommended
+
+**`deprecation`:**
+
+- **Title pattern:** "Deprecate [functionality]" or "Remove [functionality]" 
+- **Required fields:** `action` should name the replacement and link to migration guidance
+- **Optional fields:** `impact` recommended for high-impact deprecations
+
+**`known-issue`:**
+
+- **Title pattern:** Describe the issue clearly, not the investigation
+- **Required fields:** Include all affected versions and contexts; describe any available workaround in `action`
+
+**`docs`:**
+
+- **Title pattern:** "Update [documentation] for [clarity/accuracy]"
+- **Focus:** Content gaps addressed or user experience improvements
 
 ## Formatting rules for suggested text
 
@@ -214,6 +313,12 @@ Use backticks for field names, parameter names, config keys, API endpoints, comm
 ### Least confident suggestions:
 - [Field]: [Specific suggestion] — [Reason for uncertainty, e.g., "Limited PR context", "Ambiguous technical term", "Multiple interpretation options"]
 
+### Type-title alignment issues:
+- [File]: Type `[current-type]` + Title "[current-title]" — [Mismatch description]
+  - **Option A:** Keep type, suggested title: "[new-title]"
+  - **Option B:** Keep title, suggested type: `[new-type]`
+  - **Recommendation:** [Which option with reasoning]
+
 ### Terminology uncertainties:
 - [Term/phrase]: Assumed [interpretation] — [Why uncertain, e.g., "Could be UI element vs feature name", "Missing domain context"]
 
@@ -236,4 +341,4 @@ Use backticks for field names, parameter names, config keys, API endpoints, comm
 
 **Default behavior:** Default behavior is suggest-only. Only apply changes to disk after explicit user confirmation. After writing changes, re-parse YAML to validate the result.
 
-**Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your output. Note which patterns may need updating and suggest checking the canonical source directly at [https://www.elastic.co/docs/contribute-docs/content-types/changelogs](https://www.elastic.co/docs/contribute-docs/content-types/changelogs).
+**Sync awareness:** If Step 1 successfully loaded canonical guidance and you detected significant discrepancies between the live documentation and this skill's embedded patterns, flag this in your output. Note which patterns may need updating and suggest checking the canonical source directly at <https://www.elastic.co/docs/contribute-docs/content-types/changelogs>.
