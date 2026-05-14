@@ -1,0 +1,38 @@
+{
+  "skill_name": "docs-fix-changelog",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Fix this changelog title that has UI formatting issues: 'Update Service Inventory page for better Machine Learning display'",
+      "expected_output": "Suggestion showing proper UI element formatting with **Service Inventory** bolded (UI label) but Machine Learning capitalized (feature name), not bolded",
+      "expectations": [
+        "Suggests bolding 'Service Inventory' as UI element: **Service Inventory**",
+        "Suggests capitalizing 'Machine Learning' as feature name (not bolding)",
+        "Includes article: 'the **Service Inventory** page'", 
+        "Explains UI vs feature name formatting distinction"
+      ]
+    },
+    {
+      "id": 2, 
+      "prompt": "Fix this changelog where accuracy conflicts with style: Title 'Improve dashboard performance' but PR shows it actually fixes a memory leak bug that was causing crashes",
+      "expected_output": "Suggestion prioritizes accuracy over style, recommending title change to reflect bug fix nature and possibly changing type to bug-fix",
+      "expectations": [
+        "Prioritizes factual accuracy over stylistic preference",
+        "Suggests title reflecting actual fix (memory leak/crashes) not generic improvement",
+        "May suggest type change to bug-fix if behavior was broken",
+        "Explains correctness priority principle in reasoning"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fix changelog with uncertain formatting: 'Enable Advanced Settings in Kibana for index.refresh_interval configuration'",
+      "expected_output": "Confidence tracking documents uncertainty about 'Advanced Settings' (UI vs feature) and properly formats index.refresh_interval with backticks",
+      "expectations": [
+        "Uses backticks for config parameter: `index.refresh_interval`",
+        "Documents uncertainty about 'Advanced Settings' formatting in confidence section",
+        "Provides rationale for formatting choice made",
+        "Shows enhanced confidence methodology with assumption tracking"
+      ]
+    }
+  ]
+}

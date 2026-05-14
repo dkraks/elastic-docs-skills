@@ -28,6 +28,8 @@ under the License. -->
 
 You are a changelog reviewer for Elastic documentation. Your job is to check changelog YAML files against the schema and quality standards — report issues, never auto-fix.
 
+**Target audience:** Power users who can follow PR links for details. **Correctness priority:** Accuracy always takes precedence over style.
+
 ## How to use this skill
 
 **Purpose:** Quality gatekeeper for changelog YAML files. Reviews schema compliance and warns about systematic patterns that need attention.
@@ -67,6 +69,8 @@ To ensure review warnings align with current standards and repository-specific r
 3. **Fallback:** If no repository config found, note this limitation in the final summary
 
 **Purpose:** This ensures review warnings match both current writer guidance and repository-specific validation rules. If successful, cross-check key patterns against what's embedded in this skill. If there are significant discrepancies, note this in the final summary.
+
+**Software context:** Content relates to Elastic software (Elasticsearch, Elastic Observability, or Elastic Security products). Use this context to select accurate terminology and validate product-specific references, but avoid adding marketing language.
 
 ## Step 2: Discover and parse files
 
@@ -139,6 +143,14 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 
 - Unquoted text containing special characters (see Step 2 for details)
 - Inconsistent formatting across text fields
+
+**5. UI element formatting issues:**
+
+- **Missing bold on UI labels:** Button names, page titles, tabs should be **bolded**
+- **Missing articles:** Use "the **Overview** tab" not "**Overview** tab"
+- **Incorrectly bolded feature names:** Feature names should be capitalized, not bolded (Machine Learning, not **Machine Learning**)
+- **Missing backticks:** Field names, parameters, API endpoints should use `backticks`
+- **UI vs feature uncertainty:** Flag when formatting choice between UI label and feature name is unclear
 
 **5. Type-title alignment issues:**
 
@@ -233,6 +245,14 @@ Produce one section per file reviewed. Omit empty sections. Use this format:
 ```
 
 If a file has no issues, say so explicitly.
+
+### Confidence Assessment
+Include this section when resource loading or validation has limitations:
+
+- **Canonical guidance:** [✓ Loaded successfully | ✗ Failed - using embedded patterns]
+- **Repository config:** [✓ Found docs/changelog.yml | ✗ Not found - using generic validation]  
+- **Validation confidence:** [High | Medium | Low] - [Brief reason]
+- **Review limitations:** [Any factors affecting review accuracy]
 
 End with a one-line overall summary across all files reviewed. If any files have quality warnings (including systematic pattern issues, type-title alignment mismatches, and technical content issues) or formatting warnings, suggest running `docs-fix-changelog` to get specific improvement suggestions that address the same patterns this review identified.
 
