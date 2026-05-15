@@ -146,9 +146,8 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 
 **5. UI element formatting issues:**
 
-- **Missing bold on UI labels:** Button names, page titles, tabs should be **bolded**
-- **Missing articles:** Use "the **Overview** tab" not "**Overview** tab"
-- **Incorrectly bolded feature names:** Feature names should be capitalized, not bolded (Machine Learning, not **Machine Learning**)
+- **Unclear UI labels:** Button names, page titles, tabs should be in "quotation marks" if the phrase is unclear. For example: 'Fix "View in AI Assistant" button availability'
+- **Incorrectly quoted feature names:** Feature names should be capitalized, not quoted (Machine Learning, not "Machine Learning")
 - **Missing backticks:** Field names, parameters, API endpoints should use `backticks`
 - **UI vs feature uncertainty:** Flag when formatting choice between UI label and feature name is unclear
 

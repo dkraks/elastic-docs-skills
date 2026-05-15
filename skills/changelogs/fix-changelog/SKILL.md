@@ -121,9 +121,8 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 
 **5. UI element formatting fixes:**
 
-- **Bold UI labels:** Button names, page titles, tabs, dropdown names, column names (e.g., **Save**, **Service Inventory**)
-- **Include articles:** Use "the **Overview** tab" not "**Overview** tab"  
-- **Capitalize feature names:** Don't bold feature names — capitalize them (Machine Learning, Elastic Security)
+- **Quote UI labels if unclear:** Button names, page titles, tabs, dropdown names, column names (e.g., "Service Inventory") 
+- **Capitalize feature names:** Don't quote feature names — capitalize them (Machine Learning, Elastic Security)
 - **Code identifiers:** Use backticks for field names, parameters, API endpoints (`index.refresh_interval`)
 - **When uncertain:** Note formatting uncertainty if UI label vs feature name is unclear
 

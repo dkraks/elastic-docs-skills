@@ -4,11 +4,11 @@
     {
       "id": 1,
       "prompt": "Fix this changelog title that has UI formatting issues: 'Update Service Inventory page for better Machine Learning display'",
-      "expected_output": "Suggestion showing proper UI element formatting with **Service Inventory** bolded (UI label) but Machine Learning capitalized (feature name), not bolded",
+      "expected_output": "Suggestion showing proper UI element formatting with \"Service Inventory\" quoted (UI label) but Machine Learning capitalized (feature name), not quoted",
       "expectations": [
-        "Suggests bolding 'Service Inventory' as UI element: **Service Inventory**",
-        "Suggests capitalizing 'Machine Learning' as feature name (not bolding)",
-        "Includes article: 'the **Service Inventory** page'", 
+        "Suggests quoting 'Service Inventory' as UI element: \"Service Inventory\"",
+        "Suggests capitalizing 'Machine Learning' as feature name (not quoting)",
+        "Includes article: 'the \"Service Inventory\" page'", 
         "Explains UI vs feature name formatting distinction"
       ]
     },

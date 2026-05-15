@@ -4,10 +4,10 @@
     {
       "id": 1,
       "prompt": "Review this changelog with UI formatting issues: title: 'Update Service Inventory to improve **Machine Learning** display' description: 'Changes to Advanced Settings panel'",
-      "expected_output": "Flags UI formatting issues: Service Inventory should be bolded, Machine Learning shouldn't be bolded (feature name), Advanced Settings panel formatting unclear",
+      "expected_output": "Flags UI formatting issues: Service Inventory should be quoted, Machine Learning shouldn't be bolded or quoted (feature name), Advanced Settings panel formatting unclear",
       "expectations": [
-        "Flags missing bold on 'Service Inventory' (UI element)",
-        "Flags incorrect bolding of 'Machine Learning' (should be feature name, not bolded)",
+        "Flags missing quotes on 'Service Inventory' (UI element)",
+        "Flags incorrect quoting of 'Machine Learning' (should be feature name, not quoted)",
         "Notes uncertainty about 'Advanced Settings panel' formatting",
         "Includes UI element formatting issues in warnings"
       ]
