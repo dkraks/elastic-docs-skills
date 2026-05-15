@@ -97,7 +97,7 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 - **No buried lede:** If title is vague, fold in concrete detail from description so release notes stand alone
 - **Base-form verb requirement:** Use `Fix`, `Add`, `Remove` (not third-person `Fixes`, `Adds`, `Removes`)
 - **Sentence case:** Follow standard sentence capitalization
-- Feature prefixes in titles: `ESQL: Fix nullify` should be contextual like `Fix nullify in ES|QL`
+- **Feature/app prefix integration:** Detect `[Feature/App]: [Action]` patterns and suggest contextual alternatives (e.g., "File upload: Fix bug" → "Fix bug in file upload tool"). Target UI components, feature names, 1-4 word capitalized phrases. Skip technical terms (e.g., "Authorization: Bearer"), API references, code identifiers.
 
 **2. Technical term enhancement fixes:**
 
@@ -276,6 +276,18 @@ Also check for formatting anti-patterns in existing `description`, `impact`, and
 - **High confidence:** Repository configuration loaded successfully, using authoritative area validation
 - **Medium confidence:** Repository config partially available or unclear
 - **Low confidence:** No repository configuration found, using generic validation rules
+
+**Feature/app prefix integration patterns:**
+
+- `"[Feature]: Fix [issue]"` → `"Fix [issue] in [feature]"`
+- `"[Feature]: Enable [capability]"` → `"Enable [capability] for [feature]"`  
+- `"[Feature]: Add [functionality]"` → `"Add [functionality] to [feature]"`
+
+**Feature prefix suggestion confidence:**
+
+- **High confidence:** Clear UI component names, known Elastic features, good PR context
+- **Medium confidence:** Ambiguous feature names, partial context
+- **Low confidence:** Could be technical term vs feature name, missing PR details
 
 **Mode A & B** — for each weak or malformed field, show:
 

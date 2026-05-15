@@ -124,7 +124,7 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - **No buried lede:** If title is vague, fold in concrete detail from description so release notes stand alone
 - **Base-form verb requirement:** Use `Fix`, `Add`, `Remove` (not third-person `Fixes`, `Adds`, `Removes`)
 - **Sentence case:** Follow standard sentence capitalization
-- Feature prefixes in titles: `ESQL: Fix nullify` should be contextual like `Fix nullify in ES|QL`
+- **Feature/app prefix patterns:** Flag titles with `[Feature/App]: [Action]` patterns that need contextual integration (e.g., "File upload: Fix bug" should integrate the feature contextually). Skip technical terms, API references, code identifiers.
 
 **2. Technical term enhancement issues:**
 

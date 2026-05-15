@@ -33,6 +33,39 @@
         "Notes 'Medium' or 'Low' validation confidence due to missing resources",
         "Explains review limitations due to resource loading failures"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review changelog with feature prefix pattern: title: 'File upload: Fixes disabling data view creation based on user capabilities'",
+      "expected_output": "Flags feature/app prefix pattern as title standardization issue requiring contextual integration",
+      "expectations": [
+        "Flags 'File upload:' prefix pattern as title standardization issue",
+        "Categorizes under 'Feature/app prefix patterns' warning",
+        "Explains pattern needs contextual integration",
+        "Notes pattern should be handled by fix-changelog skill for solutions"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Review changelog with technical colon usage: title: 'Fix bug with Auth header needing \"Authorization: Bearer <token>\"'",
+      "expected_output": "Correctly does NOT flag technical term as feature prefix, focuses on other potential issues",
+      "expectations": [
+        "Does NOT flag 'Authorization: Bearer' as feature prefix pattern",
+        "Correctly identifies as legitimate technical/API reference",
+        "May flag other issues (YAML quoting, formatting) if present",
+        "Shows understanding of technical vs feature prefix distinction"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Review changelog with multiple title issues including feature prefix: title: 'Dashboard: fixes widget loading bugs'",
+      "expected_output": "Flags both feature prefix pattern AND other title issues (verb form, capitalization)",
+      "expectations": [
+        "Flags 'Dashboard:' as feature/app prefix pattern requiring integration",
+        "Flags verb form issue: 'fixes' should be 'Fix' (base form)",
+        "Notes title standardization issues in systematic order",
+        "Demonstrates comprehensive title pattern checking"
+      ]
     }
   ]
 }
