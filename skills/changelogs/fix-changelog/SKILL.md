@@ -74,7 +74,12 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 1. If the user passed a second argument or quoted text in `$ARGUMENTS`, treat it as context
 2. If the conversation already contains PR or issue title, description, diff, or linked references, use that
 3. If `prs` or `issues` fields in the existing file (Mode A) contain URLs, use those as implicit context — they identify the PR or issue the changelog describes
-4. If none of the above is available, ask once: "Do you have context from a PR or issue (title, description, diff, or linked references) to share? Richer context produces better suggestions." Skip this ask if the user has already declined.
+4. If none of the above is available, ask once: "Do you have context from a PR or issue (title, description, diff, or linked references) to share? **If there are acronyms in the title (like 'KI'), please clarify what they stand for.** Richer context produces better suggestions." Skip this ask if the user has already declined.
+
+**Enhanced context utilization for acronyms:**
+
+- **Scan for acronym definitions:** In PR titles/descriptions, look for patterns like "KI (Knowledge Indicator)" or context clues that define abbreviations
+- **Cross-reference expansions:** Before expanding acronyms, check if PR context contradicts assumed meaning
 
 **Track for confidence:** Document what context was available (full PR details, partial info, URLs only, or none) and any fetch failures. This will inform confidence scoring in Step 7.
 
@@ -99,6 +104,8 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 - Add backticks around class/method names, config keys, API endpoints, or code identifiers where missing
 - Convert British spelling to US English: `serialise` → `serialize`, `colour` → `color`
 - Expand abbreviations where full form would be clearer: `params` → `parameters`
+- **Acronym expansion caution:** When expanding abbreviations/acronyms (2-4 uppercase letters), flag as uncertain unless clearly defined in PR context or covered in `docs-flag-jargon-skill` patterns
+- **Elastic acronym validation:** For common Elastic acronyms, cross-reference with patterns from `docs-flag-jargon-skill` if uncertain about expansion
 - Standardize format: `ESQL` → `ES|QL`
 
 **3. Content quality fixes:**
@@ -398,6 +405,7 @@ Use backticks for field names, parameter names, config keys, API endpoints, comm
 
 ### Terminology uncertainties:
 - [Term/phrase]: Assumed [interpretation] — [Why uncertain, e.g., "Could be UI element vs feature name", "Missing domain context"]
+- [Acronym]: Expanded to "[expansion]" — [Confidence level: High/Medium/Low based on PR context, jargon-skill patterns, or domain knowledge]
 
 ### Assumptions made:
 - [Assumption]: [Rationale, e.g., "Normalized technical term based on common Elastic usage", "Inferred user impact from limited PR description"]

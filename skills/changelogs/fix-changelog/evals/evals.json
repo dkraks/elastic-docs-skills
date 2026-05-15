@@ -33,6 +33,19 @@
         "Provides rationale for formatting choice made",
         "Shows enhanced confidence methodology with assumption tracking"
       ]
+    },
+    {
+      "id": 4,
+      "prompt": "Fix changelog title with ambiguous acronym: 'fix: KI details flyout pushes page content in dark mode'. No PR context provided.",
+      "expected_output": "Flags 'KI' acronym expansion as uncertain, asks for clarification, and documents acronym uncertainty in confidence section rather than guessing the expansion",
+      "expectations": [
+        "Strips development prefix 'fix:' from title",
+        "Flags 'KI' acronym as requiring clarification rather than expanding to 'knowledge item'",
+        "Documents acronym uncertainty in 'Terminology uncertainties' confidence section",
+        "Asks user to clarify what 'KI' stands for in context request",
+        "References checking docs-flag-jargon-skill patterns for common acronyms",
+        "Shows medium/low confidence for acronym-related suggestions"
+      ]
     }
   ]
 }
