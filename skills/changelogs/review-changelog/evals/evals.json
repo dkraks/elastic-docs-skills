@@ -132,6 +132,29 @@
         "States review never deletes files — report only",
         "Heuristic fires on test-only/internal refactor signals from PR or description"
       ]
+    },
+    {
+      "id": 13,
+      "prompt": "Review changelog: type bug-fix, title 'Don't allow runtime fields to shadow fields used in index sort'",
+      "expected_output": "Flags preventive/restrictive framing and negative imperative verb mismatch on bug-fix",
+      "expectations": [
+        "Flags Don't as negative imperative — not an approved leading verb",
+        "Flags preventive/restrictive framing: describes restriction not user-visible failure",
+        "Suggests symptom-first rewrite pattern Fix [symptom] when [condition]",
+        "Notes type-title alignment mismatch for bug-fix without Fix/Resolve/Correct",
+        "Reports under quality warnings, not schema errors"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Review changelog: type bug-fix, title 'Ability to configure custom timeouts for cross-cluster search'",
+      "expected_output": "Flags noun-phrase title missing approved base-form leading verb",
+      "expectations": [
+        "Flags 'Ability to' as noun-phrase or gerund-led title pattern",
+        "Notes title does not start with approved base-form verb for bug-fix (Fix, Resolve, Correct)",
+        "Categorizes under quality warnings",
+        "Does not auto-fix — report only"
+      ]
     }
   ]
 }
