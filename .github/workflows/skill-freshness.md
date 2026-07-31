@@ -30,6 +30,13 @@ safe-outputs:
   create-pull-request:
     title-prefix: "[skill-freshness] "
     labels: [automated, skill-freshness]
+    allowed-files:
+      - skills/**/SKILL.md
+      - .claude-plugin/plugin.json
+    protected-files:
+      policy: request_review
+      exclude:
+        - .claude-plugin/
   add-comment:
   close-issue:
 ---
