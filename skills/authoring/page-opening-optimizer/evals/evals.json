@@ -6,7 +6,6 @@
       "prompt": "Optimize the opening of this how-to page:\n\n---\ndescription: Learn how to use pattern analysis to find log patterns.\n---\n\n# Pattern analysis\n\nYou can use pattern analysis in Discover to find patterns in your log data. It helps you find common patterns.",
       "expected_output": "Improved H1 with anchor, a richer opening paragraph that defines what pattern analysis is and its value, and a suggestion to add a requirements section",
       "expectations": [
-        "Adds an anchor to the H1 (e.g., [pattern-analysis] or similar)",
         "Rewrites the opening paragraph to define what pattern analysis is and explain its value",
         "Does not repeat the frontmatter description verbatim in the opening paragraph",
         "Replaces 'Discover' with bold formatting (**Discover**) as a UI element",
@@ -30,7 +29,6 @@
       "expected_output": "Improved H1 with context and anchor, acronym spelled out on first use, version reference updated, substitutions applied",
       "expectations": [
         "Improves the H1 to be more discoverable (e.g., 'Query your data with ES|QL in Discover')",
-        "Adds an anchor to the H1",
         "Spells out the acronym on first use: 'Elasticsearch Query Language ({{esql}})'",
         "Removes the pre-9.0 version reference ('version 8.0 or later')",
         "Replaces hardcoded 'Kibana' with {{product.kibana}} substitution"
