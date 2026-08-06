@@ -1,6 +1,6 @@
 ---
 name: docs-fix-changelog
-version: 2.4.1
+version: 2.4.2
 description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes type-title alignment checking and technical content assessment to catch overly technical titles that need user-focused rewrites. Features repository-aware area validation and enhanced confidence scoring. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.
 argument-hint: "[changelog-file-or-directory] [pr/issue-context]"
 context: fork
@@ -8,8 +8,6 @@ allowed-tools: Read, Grep, Glob, WebFetch
 sources:
 - https://github.com/elastic/docs-builder/blob/main/src/Elastic.Documentation/ReleaseNotes/ChangelogEntry.cs
 - https://www.elastic.co/docs/contribute-docs/content-types/changelogs
-- https://elastic.github.io/docs-builder/syntax/links/
-- https://elastic.github.io/docs-builder/syntax/code/
 ---
 
 You are a changelog writing assistant for Elastic documentation. You suggest improved text for changelog fields and help draft content for new changelogs. You do not create files — file creation is always done via `docs-builder changelog add`.
