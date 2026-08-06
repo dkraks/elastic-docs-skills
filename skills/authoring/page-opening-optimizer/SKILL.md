@@ -54,10 +54,9 @@ The H1 must be:
 1. **Discoverable** — include the feature name and context (e.g., "in Kibana", "with ES|QL")
 2. **Specific** — clearly indicate what the page covers
 3. **Unique** — no other page should share this title
-4. **Anchored** — always include `[anchor-name]` in brackets
 
 ```markdown
-# Configure data views in Kibana [configure-data-views]
+# Configure data views in Kibana
 ```
 
 If the H1 exceeds ~50 characters, add `navigation_title` to the frontmatter.
@@ -178,7 +177,7 @@ Before modifying any file, verify:
 ## Quality checklist
 
 - [ ] Doc type correctly identified
-- [ ] H1 is unique, specific, searchable, and has an anchor
+- [ ] H1 is unique, specific, searchable (no custom anchor — docs-builder auto-generates it)
 - [ ] `navigation_title` added if H1 > 50 characters
 - [ ] Opening paragraph doesn't repeat frontmatter description
 - [ ] Opening conveys purpose, value, and scope
