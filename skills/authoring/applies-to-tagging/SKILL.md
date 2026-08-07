@@ -209,7 +209,7 @@ When validating, check for these errors:
 ### Placement and lifecycle hygiene
 
 - Don't duplicate inline `{applies_to}` deployment badges when the sentence already names those deployment types.
-- When a feature moves preview → GA, update section-level lifecycle history and remove obsolete preview warnings the badge now covers.
+- When a feature is properly tagged with applies_to badges, remove any obsolete admonitions the badge now covers.
 - Scope each list item independently when siblings start in different versions — not a container tag with one override.
 - Version-scoped content that can't fold into an adjacent paragraph and has no list to join → `:::{note}` or `:::{tip}` with `:applies_to:` metadata, not a standalone tagged paragraph.
 
