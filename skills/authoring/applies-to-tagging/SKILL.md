@@ -1,6 +1,6 @@
 ---
 name: docs-applies-to-tagging
-version: 1.3.1
+version: 1.3.2
 description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (experimental, preview, beta, GA, deprecated, removed).
 argument-hint: <file-or-directory-or-intent>
 context: fork
@@ -221,6 +221,16 @@ Because tags resolve to the minor, content that lands in a minor already represe
 
 This is the cumulative-docs corollary of "tag at the minor level": one minor, one place.
 
+### Prefer the lightest cumulative form
+
+When content must be version- or deployment-scoped, pick the simplest form that still works:
+
+1. **Tagged tip, note, or short paragraph** — additive change; existing content stays untouched.
+2. **Tagged bullet points** — some list items apply only to certain versions or deployments.
+3. **`applies-switch` tabs** — only when the two contexts' content is substantial and truly diverges.
+
+Do not reach for tabs when a tagged tip or bullet would do.
+
 ### Place `applies_to` where the change applies
 
 Pick the form that matches what the change is scoped to:
@@ -325,6 +335,10 @@ Before suggesting any change involving version-scoped content, ask:
 - Never write versions in prose adjacent to badges — they contradict the "Planned" badge text before release.
 - Versions display as Major.Minor in badges regardless of patch numbers in source.
 - Each version statement covers the latest patch of that minor.
+
+### Availability floor vs backport labels
+
+A version in an issue availability table, or a `vX.Y.Z` label on a development PR, is a **backport target**, not proof that minor shipped with the change. Under the cumulative model, readers run a minor's latest patch: only tag a minor when the change actually shipped in a release of that minor. If the minor ended before the backport landed (for example a `v9.3.9` label when 9.3 ended at 9.3.8), that minor must not drive `applies_to`. `applies_to` is a single monotonic Major.Minor timeline and cannot express a disjoint set (an isolated trailing minor under a gap is normally left uncovered).
 
 ## Generate-from-intent execution
 
