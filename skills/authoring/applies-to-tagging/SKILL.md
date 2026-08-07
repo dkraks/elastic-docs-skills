@@ -1,6 +1,6 @@
 ---
 name: docs-applies-to-tagging
-version: 1.3.0
+version: 1.3.1
 description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (experimental, preview, beta, GA, deprecated, removed).
 argument-hint: <file-or-directory-or-intent>
 context: fork
@@ -205,6 +205,17 @@ When validating, check for these errors:
 
 - Content is genuinely version- or deployment-scoped, isn't already covered by a parent tag, and isn't better expressed inline.
 - Functionality is added in a specific release, lifecycle state changes (preview → GA, deprecated, removed), or availability differs across products or deployment types.
+
+### Reference pages and cumulative readers
+
+Reference pages serve all supported versions, not only the latest reader. A properly framed version-transition or deprecation note belongs on the reference page when older readers may search for the old term. Release notes and breaking-changes pages are additional homes, not substitutes.
+
+### Placement and lifecycle hygiene
+
+- Don't duplicate inline `{applies_to}` deployment badges when the sentence already names those deployment types.
+- When a feature moves preview → GA, update section-level lifecycle history and remove obsolete preview warnings the badge now covers.
+- Scope each list item independently when siblings start in different versions — not a container tag with one override.
+- Version-scoped content that can't fold into an adjacent paragraph and has no list to join → `:::{note}` or `:::{tip}` with `:applies_to:` metadata, not a standalone tagged paragraph.
 
 ### Consolidate with content that already covers the version
 
