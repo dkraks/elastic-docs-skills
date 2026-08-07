@@ -206,10 +206,6 @@ When validating, check for these errors:
 - Content is genuinely version- or deployment-scoped, isn't already covered by a parent tag, and isn't better expressed inline.
 - Functionality is added in a specific release, lifecycle state changes (preview → GA, deprecated, removed), or availability differs across products or deployment types.
 
-### Reference pages and cumulative readers
-
-Reference pages serve all supported versions, not only the latest reader. A properly framed version-transition or deprecation note belongs on the reference page when older readers may search for the old term. Release notes and breaking-changes pages are additional homes, not substitutes.
-
 ### Placement and lifecycle hygiene
 
 - Don't duplicate inline `{applies_to}` deployment badges when the sentence already names those deployment types.
