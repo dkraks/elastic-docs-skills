@@ -1,6 +1,6 @@
 ---
 name: docs-applies-to-tagging
-version: 1.3.0
+version: 1.3.2
 description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (experimental, preview, beta, GA, deprecated, removed).
 argument-hint: <file-or-directory-or-intent>
 context: fork
@@ -206,6 +206,13 @@ When validating, check for these errors:
 - Content is genuinely version- or deployment-scoped, isn't already covered by a parent tag, and isn't better expressed inline.
 - Functionality is added in a specific release, lifecycle state changes (preview → GA, deprecated, removed), or availability differs across products or deployment types.
 
+### Placement and lifecycle hygiene
+
+- Don't duplicate inline `{applies_to}` deployment badges when the sentence already names those deployment types.
+- When a feature is properly tagged with applies_to badges, remove any obsolete admonitions the badge now covers.
+- Scope each list item independently when siblings start in different versions — not a container tag with one override.
+- Version-scoped content that can't fold into an adjacent paragraph and has no list to join → `:::{note}` or `:::{tip}` with `:applies_to:` metadata, not a standalone tagged paragraph.
+
 ### Consolidate with content that already covers the version
 
 Before adding a new tagged bullet, section, or block, check whether the page already has a structure covering the **same minor**. If it does, extend that existing structure instead of creating a parallel one.
@@ -213,6 +220,16 @@ Before adding a new tagged bullet, section, or block, check whether the page alr
 Because tags resolve to the minor, content that lands in a minor already represented belongs in the structure that already represents it. For example, if a list already has a `{applies_to}`stack: ga 9.4`` bullet and you're documenting a related detail that shipped in 9.4.2, fold it into that same 9.4 bullet — a second `stack: ga 9.4.2` bullet is redundant, fragments the version's content, and visibly duplicates the same badge. Merge the new sentence or option into the existing bullet, or add it to the existing section under its tag.
 
 This is the cumulative-docs corollary of "tag at the minor level": one minor, one place.
+
+### Prefer the lightest cumulative form
+
+When content must be version- or deployment-scoped, pick the simplest form that still works:
+
+1. **Tagged tip, note, or short paragraph** — additive change; existing content stays untouched.
+2. **Tagged bullet points** — some list items apply only to certain versions or deployments.
+3. **`applies-switch` tabs** — only when the two contexts' content is substantial and truly diverges.
+
+Do not reach for tabs when a tagged tip or bullet would do.
 
 ### Place `applies_to` where the change applies
 
@@ -318,6 +335,10 @@ Before suggesting any change involving version-scoped content, ask:
 - Never write versions in prose adjacent to badges — they contradict the "Planned" badge text before release.
 - Versions display as Major.Minor in badges regardless of patch numbers in source.
 - Each version statement covers the latest patch of that minor.
+
+### Availability floor vs backport labels
+
+A version in an issue availability table, or a `vX.Y.Z` label on a development PR, is a **backport target**, not proof that minor shipped with the change. Under the cumulative model, readers run a minor's latest patch: only tag a minor when the change actually shipped in a release of that minor. If the minor ended before the backport landed (for example a `v9.3.9` label when 9.3 ended at 9.3.8), that minor must not drive `applies_to`. `applies_to` is a single monotonic Major.Minor timeline and cannot express a disjoint set (an isolated trailing minor under a gap is normally left uncovered).
 
 ## Generate-from-intent execution
 
