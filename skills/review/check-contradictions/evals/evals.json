@@ -1,0 +1,60 @@
+{
+  "skill_name": "docs-check-contradictions",
+  "evals": [
+    {
+      "id": 1,
+      "note": "Availability contradiction: new content claims ECE is supported. Published mOTLP page explicitly says ECE is NOT supported. Expects Review draft direction.",
+      "prompt": "Check ~/docs/motlp-setup.md for contradictions. The file contains:\n---\nnavigation_title: Set up the Managed OTLP Endpoint\napplies_to:\n  serverless: ga\n  deployment:\n    ech: ga\n    ece: ga\n---\n\n# Set up the Managed OTLP Endpoint\n\nThe Managed OTLP Endpoint is available for Elastic Cloud Serverless projects, Elastic Cloud Hosted (ECH) deployments, and Elastic Cloud Enterprise (ECE) deployments.\n\n## Authentication\n\nAuthenticate using an API key with the `event:write` privilege for the `apm` application:\n\n```http\nAuthorization: ApiKey <your-api-key>\n```",
+      "expected_output": "Finds a contradiction between the ECE availability claim and the published mOTLP reference page, which explicitly states ECE is not supported. Reports direction as Review draft.",
+      "expectations": [
+        "Finds a contradiction about ECE support",
+        "Reports the direction as 'Review draft' (not 'Verify both' or 'Review existing')",
+        "Identifies this as an Availability/Scope claim type",
+        "References the published mOTLP page or a local equivalent as the conflicting source",
+        "Does NOT flag the ApiKey authentication format as a contradiction",
+        "Does NOT flag the serverless or ECH availability claims as contradictions"
+      ]
+    },
+    {
+      "id": 2,
+      "note": "Values contradiction: new content recommends queue_size of 25 MB. Published mOTLP page recommends 50 MB. Neither page is clearly authoritative — expects Verify both. Also checks that the Direction field stays clean (no filenames or qualifiers appended to the label).",
+      "prompt": "Check ~/docs/collector-tuning.md for contradictions. The file contains:\n---\nnavigation_title: Collector performance tuning\n---\n\n# OpenTelemetry Collector performance tuning\n\nConfigure the OTLP exporter with the following recommended settings for the Managed OTLP Endpoint:\n\n```yaml\nexporters:\n  otlp/elastic:\n    endpoint: \"${MOTLP_ENDPOINT}\"\n    headers:\n      Authorization: \"ApiKey <key>\"\n    sending_queue:\n      enabled: true\n      sizer: bytes\n      queue_size: 25_000_000\n      block_on_overflow: true\n      batch:\n        flush_timeout: 200ms\n        min_size: 1_000_000\n        max_size: 2_000_000\n```\n\nA `queue_size` of 25 MB works well for most deployments.",
+      "expected_output": "Finds that queue_size (25 MB), flush_timeout (200ms), and max_size (2 MB) contradict the published mOTLP page which recommends 50 MB / 1s / 4 MB. Reports direction as Verify both. The Direction field contains only the label — no filenames or extra qualifiers.",
+      "expectations": [
+        "Finds contradictions on queue_size, flush_timeout, and max_size values",
+        "Reports direction as exactly 'Verify both' — no filenames, no parenthetical qualifiers appended to the label",
+        "Identifies these as Values claim type",
+        "References the published mOTLP page as the conflicting source",
+        "Notes that SME confirmation is needed before updating either page",
+        "Does NOT flag the ApiKey format or block_on_overflow as contradictions"
+      ]
+    },
+    {
+      "id": 3,
+      "note": "Capabilities contradiction: new content claims tail-based sampling is supported by the Managed OTLP Endpoint. Published docs (mOTLP reference, limitations, features matrix) all say TBS is NOT available. Expects Review draft.",
+      "prompt": "Check ~/docs/sampling-guide.md for contradictions. The file contains:\n---\nnavigation_title: Sampling with the Managed OTLP Endpoint\n---\n\n# Sampling with the Managed OTLP Endpoint\n\nThe Managed OTLP Endpoint supports tail-based sampling (TBS) through its integration with the Elastic APM backend. To enable TBS, configure the `tail_sampling` processor in your collector pipeline before forwarding traces to the endpoint:\n\n```yaml\nprocessors:\n  tail_sampling:\n    decision_wait: 10s\n    policies:\n      - name: errors-policy\n        type: status_code\n        status_code:\n          status_codes: [ERROR]\n```\n\nHead-based sampling is also supported and can be configured directly in your SDK.",
+      "expected_output": "Finds that the TBS availability claim contradicts the published mOTLP limitations page and features matrix, which both mark managed/hosted TBS in Elastic Cloud as not available. Reports direction as Review draft. Does not flag head-based sampling.",
+      "expectations": [
+        "Finds a contradiction about tail-based sampling (TBS) availability",
+        "Reports direction as 'Review draft'",
+        "Identifies this as a Capabilities claim type",
+        "References at least one published source (mOTLP page, limitations page, or features matrix) confirming TBS is not available",
+        "Does NOT flag head-based sampling as a contradiction (it is supported)",
+        "Recommends confirming with an SME before removing the TBS section"
+      ]
+    },
+    {
+      "id": 4,
+      "note": "Clean content: all claims are consistent with published docs. No contradictions should be reported.",
+      "prompt": "Check ~/docs/motlp-auth.md for contradictions. The file contains:\n---\nnavigation_title: Authenticate with the Managed OTLP Endpoint\n---\n\n# Authenticate with the Managed OTLP Endpoint\n\nThe Managed OTLP Endpoint is available for Elastic Cloud Serverless projects and Elastic Cloud Hosted (ECH) deployments. It is not available for self-managed, ECE, or ECK clusters.\n\nAuthenticate using an Elasticsearch API key with the `event:write` privilege for the `apm` application. Send the encoded key in the `Authorization` header:\n\n```http\nAuthorization: ApiKey <encoded-api-key>\n```\n\nTail-based sampling is not available through the Managed OTLP Endpoint. To use tail-based sampling, configure the `tailsamplingprocessor` in your OpenTelemetry Collector before sending data to the endpoint.",
+      "expected_output": "Reports no contradictions. All claims — ECE not supported, ApiKey auth format, TBS not available — are consistent with published docs.",
+      "expectations": [
+        "Reports no contradictions, or zero findings",
+        "Does NOT flag ECE exclusion as a contradiction",
+        "Does NOT flag ApiKey auth format as a contradiction",
+        "Does NOT flag the TBS-not-available statement as a contradiction",
+        "States that the cross-repo check ran and found no conflicts"
+      ]
+    }
+  ]
+}
