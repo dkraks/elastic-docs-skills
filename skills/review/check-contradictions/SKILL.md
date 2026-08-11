@@ -1,8 +1,9 @@
 ---
 name: docs-check-contradictions
-version: 1.0.0
+version: 1.0.1
 description: Check whether newly written or updated documentation contradicts existing content elsewhere in the docs. Use when adding or editing any docs content — procedures, concepts, prerequisites, values, names, recommendations, or cross-references — to find stale or conflicting information, both in the local repo and across all published Elastic docs, that needs updating alongside your changes.
 argument-hint: <file-or-directory>
+disable-model-invocation: true
 context: fork
 allowed-tools: Read, Grep, Glob, WebFetch
 sources:

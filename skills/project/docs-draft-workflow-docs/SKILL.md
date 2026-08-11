@@ -1,6 +1,6 @@
 ---
 name: docs-draft-workflow-docs
-version: 1.1.7
+version: 1.1.8
 description: Draft or update Elastic Workflows documentation pages in explore-analyze/workflows/ — step references, use cases, how-tos, concepts, and overviews. Use when writing Workflows docs, documenting a step type, turning workflow YAML into documentation, drafting from a doc issue in docs-content or docs-content-internal, or creating a new page under the Workflows docset.
 argument-hint: <doc-issue-url-or-page-idea-or-file-path>
 disable-model-invocation: true
@@ -390,7 +390,7 @@ Consult [`/docs-syntax-help`](https://github.com/elastic/elastic-docs-skills/tre
 ```yaml
 ---
 navigation_title: <Short nav label>   # omit on hub pages when title suffices
-description: <One sentence for search and tooltips — include "workflow" and the specific topic>
+description: <One sentence describing this Workflows page's content>
 products:
   - id: kibana
   - id: cloud-serverless    # include when feature is available on serverless

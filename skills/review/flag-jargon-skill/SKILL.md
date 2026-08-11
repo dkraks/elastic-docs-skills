@@ -1,8 +1,9 @@
 ---
 name: docs-flag-jargon-skill
-version: 1.0.2
+version: 1.0.3
 description: Flag Elastic-internal jargon in documentation and suggest plain-language replacements. Use when reviewing, writing, or editing docs to catch terms that external readers would not understand.
 argument-hint: <file-or-directory>
+disable-model-invocation: true
 context: fork
 allowed-tools: Read, Grep, Glob
 sources:
