@@ -242,6 +242,14 @@ Pick the form that matches what the change is scoped to:
     - ❌ `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this. {applies_to}`stack: preview 9.6+`` It also does this other thing.`
     - ✅ Merge into one sentence so a single tag pair unambiguously covers the whole thing: `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this, which also does the other thing.`
     - ✅ Or, if merging would cram two distinct ideas into one sentence, pull the content into its own tagged short paragraph instead (see "Prefer the lightest cumulative form" above) rather than tagging each sentence separately.
+  - **A single tag inserted once between two sentences is still floating, even without repetition.** Physical adjacency to the sentence it's meant to cover doesn't establish scope — only a blank-line paragraph boundary or one of the sanctioned inline positions (list item, definition term, table cell) does.
+    - ❌ `General statement that applies to every version. {applies_to}`stack: ga 9.5+`` This part only applies from 9.5.`
+    - ✅ Split into two paragraphs so the tag leads the one it scopes, with a blank line before it:
+      ```markdown
+      General statement that applies to every version.
+
+      {applies_to}`stack: ga 9.5+` This part only applies from 9.5.
+      ```
 - **Admonition or dropdown** — use the `:applies_to:` directive option when prose needs version scoping but doesn't fit any of the inline positions above. Restructure the prose into the admonition rather than inventing a new inline placement.
 - **`applies-switch` tabs** — only when content truly diverges between contexts (a stack-only step that has no serverless equivalent, with materially different code):
 ````markdown
