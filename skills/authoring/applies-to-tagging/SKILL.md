@@ -1,6 +1,6 @@
 ---
 name: docs-applies-to-tagging
-version: 1.3.2
+version: 1.3.3
 description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (experimental, preview, beta, GA, deprecated, removed).
 argument-hint: <file-or-directory-or-intent>
 context: fork
@@ -237,7 +237,19 @@ Pick the form that matches what the change is scoped to:
 
 - **Section level** — fenced `{applies_to}` block immediately after the heading, when the change is relevant to a section.
 - **Page level** — YAML frontmatter, when the change scopes the whole page.
-- **Inline** — only at start of a list item, end of a definition term, or inside a table cell. Never mid-sentence in running prose, and never floating between sentences in a paragraph (scope becomes ambiguous).
+- **Inline** — only at start of a paragraph, list item, end of a definition term, or inside a table cell. Never mid-sentence in running prose, and never floating between sentences in a paragraph (scope becomes ambiguous).
+  - **Don't repeat an inline tag before a second sentence in the same paragraph to "extend" its scope.** A tag placed right after a period and before the next sentence is the floating-between-sentences case above, even though it visually sits next to the sentence it's meant to cover.
+    - ❌ `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this. {applies_to}`stack: preview 9.6+`` It also does this other thing.`
+    - ✅ Merge into one sentence so a single tag pair unambiguously covers the whole thing: `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this, which also does the other thing.`
+    - ✅ Or, if merging would cram two distinct ideas into one sentence, pull the content into its own tagged short paragraph instead (see "Prefer the lightest cumulative form" above) rather than tagging each sentence separately.
+  - **A single tag inserted once between two sentences is still floating, even without repetition.** Physical adjacency to the sentence it's meant to cover doesn't establish scope — only a blank-line paragraph boundary or one of the sanctioned inline positions (list item, definition term, table cell) does.
+    - ❌ `General statement that applies to every version. {applies_to}`stack: ga 9.5+`` This part only applies from 9.5.`
+    - ✅ Split into two paragraphs so the tag leads the one it scopes, separated by a blank line:
+      ```markdown
+      General statement that applies to every version.
+
+      {applies_to}`stack: ga 9.5+` This part only applies from 9.5.
+      ```
 - **Admonition or dropdown** — use the `:applies_to:` directive option when prose needs version scoping but doesn't fit any of the inline positions above. Restructure the prose into the admonition rather than inventing a new inline placement.
 - **`applies-switch` tabs** — only when content truly diverges between contexts (a stack-only step that has no serverless equivalent, with materially different code):
 ````markdown
