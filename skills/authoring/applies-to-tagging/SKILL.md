@@ -237,7 +237,7 @@ Pick the form that matches what the change is scoped to:
 
 - **Section level** — fenced `{applies_to}` block immediately after the heading, when the change is relevant to a section.
 - **Page level** — YAML frontmatter, when the change scopes the whole page.
-- **Inline** — only at start of a list item, end of a definition term, or inside a table cell. Never mid-sentence in running prose, and never floating between sentences in a paragraph (scope becomes ambiguous).
+- **Inline** — only at start of a paragraph, list item, end of a definition term, or inside a table cell. Never mid-sentence in running prose, and never floating between sentences in a paragraph (scope becomes ambiguous).
   - **Don't repeat an inline tag before a second sentence in the same paragraph to "extend" its scope.** A tag placed right after a period and before the next sentence is the floating-between-sentences case above, even though it visually sits next to the sentence it's meant to cover.
     - ❌ `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this. {applies_to}`stack: preview 9.6+`` It also does this other thing.`
     - ✅ Merge into one sentence so a single tag pair unambiguously covers the whole thing: `{applies_to}`stack: preview 9.6+`` Use coordinator mode for this, which also does the other thing.`
