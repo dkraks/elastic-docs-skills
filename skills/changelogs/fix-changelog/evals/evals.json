@@ -170,6 +170,28 @@
         "Includes type-title alignment in confidence section",
         "Does not false-positive on titles already starting with Fix and including symptoms"
       ]
+    },
+    {
+      "id": 16,
+      "prompt": "Fix changelog: type bug-fix, title 'Fix maintenance window name references in monitors', no areas field. PR title and body mention Synthetics monitoring as context (e.g. [Synthetics] Support referencing maintenance windows by name in monitors).",
+      "expected_output": "Suggests title with product/surface context from PR; documents PR-derived surface in Confidence section",
+      "expectations": [
+        "Suggests title including Synthetics (e.g. Fix maintenance window name references in Synthetics monitors)",
+        "Uses product/surface extraction from PR context (Step 3), not areas (areas absent)",
+        "Documents PR-derived surface context in Confidence + Assumptions",
+        "Keeps base-form title verb Fix"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Fix changelog: type bug-fix, title 'Fix Fleet secrets stored inline during package policy bulk create', description: 'Fixed Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.'",
+      "expected_output": "Rewrites description to third-person present Fixes…; explains title vs description verb-form split",
+      "expectations": [
+        "Suggests description starting with Fixes (not Fixed)",
+        "References verb-form split: title base-form Fix; description third-person present Fixes",
+        "Does not change title verb from Fix to Fixes",
+        "High confidence for routine tense correction"
+      ]
     }
   ]
 }
