@@ -1,6 +1,6 @@
 ---
 name: docs-applies-to-tagging
-version: 1.3.3
+version: 1.3.4
 description: Validate and generate applies_to tags in Elastic documentation, including for cumulative docs across versions and deployment types. Use when writing new docs pages, reviewing existing pages for correct applies_to usage, deciding whether to preserve or replace existing version-scoped content, or when content changes lifecycle state (experimental, preview, beta, GA, deprecated, removed).
 argument-hint: <file-or-directory-or-intent>
 context: fork
@@ -139,7 +139,7 @@ Use `ech` for Elastic Cloud Hosted. `ess` is a deprecated alias and should not b
 Unversioned products (serverless) use lifecycle only: `serverless: ga`.
 
 When generating new tags, make version intent explicit:
-- **Tag at the minor level by default.** Even when a feature ships in a patch release (for example 9.4.2), tag it at the minor: `stack: ga 9.4`, not `stack: ga 9.4.2`. Badges only ever display Major.Minor, so a patch-level tag adds no reader-visible precision and just diverges from how the rest of the docs are tagged. Reserve patch versions for plain-text prose, and only when the patch distinction is genuinely critical (see version display notes).
+- **Tag at the minor level by default.** Even when a feature ships in a patch release (for example 9.4.2), tag it at the minor: `stack: ga 9.4`, not `stack: ga 9.4.2`. Badges only ever display Major.Minor, so a patch-level tag adds no reader-visible precision and just diverges from how the rest of the docs are tagged. **Don't name the patch number in prose either.** Cumulative docs treat a minor-level tag as always representing the latest patch of that minor — once a feature ships in any patch, write it as simply available in that minor, with no "starting in x.y.z" qualifier. A plain-text patch callout is an extremely rare exception (see version display notes), not a default fallback: reach for it only when omitting the patch would actively mislead a reader on an earlier patch of the same minor, and treat it as a judgment call worth flagging for review rather than doing unprompted, since it undermines the assumption the rest of the corpus relies on.
 - Use `x.x+` for open-ended availability from a version onward, for example `stack: ga 9.1+`.
 - Use `=x.x` for exactly one minor version, for example `stack: preview =9.0`.
 - Use `x.x-y.y` for an inclusive range, for example `stack: beta 9.1-9.2`.
@@ -148,8 +148,8 @@ When generating new tags, make version intent explicit:
 
 **Important version display notes:**
 - Versions always display as **Major.Minor** (e.g., `9.1`) in badges, regardless of whether you specify patch versions in the source.
-- Each version statement corresponds to the **latest patch** of the specified minor version (e.g., `9.1` represents 9.1.0, 9.1.1, 9.1.6, etc.).
-- When critical patch-level differences exist, use plain text descriptions alongside the badge rather than specifying patch versions.
+- Each version statement corresponds to the **latest patch** of the specified minor version (e.g., `9.1` represents 9.1.0, 9.1.1, 9.1.6, etc.). This is load-bearing for cumulative docs: don't spell out which patch a feature actually shipped in, either in the tag or in prose. Once it's shipped in any patch, it belongs to that minor, full stop.
+- Naming a specific patch in plain text is an extremely rare exception, not a normal tool. Reach for it only when omitting the patch would be actively misleading, not just slightly imprecise, and prefer surfacing it as a question rather than doing it unprompted.
 - Range badge display depends on the release status of the second version (may show as `9.0+` instead of `9.0-9.2` if the end version isn't yet released).
 
 ### Implicit version inference
@@ -346,7 +346,7 @@ Before suggesting any change involving version-scoped content, ask:
 
 - Never write versions in prose adjacent to badges — they contradict the "Planned" badge text before release.
 - Versions display as Major.Minor in badges regardless of patch numbers in source.
-- Each version statement covers the latest patch of that minor.
+- Each version statement covers the latest patch of that minor — don't name the specific patch in prose either, except in the extremely rare case where leaving it out would mislead a reader on an earlier patch of the same minor.
 
 ### Availability floor vs backport labels
 
