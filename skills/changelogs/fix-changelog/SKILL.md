@@ -150,51 +150,16 @@ Apply the systematic pattern checklist from `docs-review-changelog` (Step 4). Ad
 
 ## Step 4.5: Type-Title Alignment Check
 
-Validate that `type` and `title` verb patterns align (same rules as review Step 4.5). When mismatch detected, provide both options: keep type and rewrite title, or keep title and suggest type change.
+Apply the same type-title alignment rules as `docs-review-changelog` Step 4 item **6** (expected verbs, preventive framing, misalignment flags). Do not restate the verb tables here.
 
-**`bug-fix` / `regression`:**
-
-- **Expected verbs:** `Fix`, `Resolve`, `Correct`
-- **Expected pattern:** "Fix [symptom] in [context]"
-- **Flag if title uses:** `Improve`, `Enable`, `Update`, `Enhance`
-- **Also flag:** `Default`, `Reserve`, `Ensure` without `Fix` — rewrite as **Fix [what was wrong]**
-- **Preventive/restrictive framing:** Flag titles that describe a new restriction or validation rather than the user-visible failure, especially when the title does NOT start with `Fix`, `Resolve`, or `Correct`
-  - **Leading patterns to flag:** `Don't`, `Do not`, `Disallow`, `Prevent`, `Reject`, `Block`, `Forbid`, `Prohibit`, `Restrict`, `No longer allow`
-  - **Warning:** Title explains what is now blocked, not what was broken (recovery failure, query error, cluster red, etc.)
-  - **Suggest:** Rewrite as `Fix [symptom] when [condition]` — e.g. "Don't allow runtime fields to shadow index sort fields" → "Fix shard recovery failures when runtime fields shadow index sort fields"
-  - **Type note:** If the change only adds validation with no prior user-visible failure, consider `enhancement` instead of `bug-fix`
-- **Action:** Suggest either changing type to `enhancement` OR rewriting title to describe what was broken
-
-**`enhancement`:**
-
-- **Expected verbs:** `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`
-- **Expected pattern:** "Improve [capability] for [context]"  
-- **Flag if title uses:** `Fix`, `Resolve`, `Correct`
-- **Action:** Suggest either changing type to `bug-fix` OR rewriting title to focus on improvement/capability
-
-**`feature`:**
-
-- **Expected verbs:** `Add`, `Introduce`, `Enable`, `Support`  
-- **Expected pattern:** "Add [new capability] for [users]"
-- **Flag if title uses:** `Fix`, `Improve` (unless truly new)
-- **Action:** Major new functionality → `feature`. Minor additions → `enhancement`
-
-**`docs`:**
-
-- **Expected verbs:** `Update`, `Add`, `Clarify`, `Document`
-- **Expected pattern:** "Update [documentation] for [clarity/accuracy]"
-
-**`breaking-change` / `deprecation` / `known-issue` / `security`:**
-
-- **Any appropriate verb** but should align with the actual change nature
-- **Focus on clarity** rather than strict verb patterns
+When a mismatch is detected, provide both options: keep type and rewrite title, or keep title and suggest type change. Include a confidence note explaining which option is more likely correct based on PR context.
 
 ### Alignment Assessment Process
 
 For each changelog:
 
 1. **Extract leading verb** from title (first word after articles/prepositions)
-2. **Check against expected verbs** for the declared type
+2. **Check against expected verbs** for the declared type (per review Step 4 item 6)
 3. **If mismatch detected**, provide both options:
    - **Option A:** Keep type, rewrite title with appropriate verb
    - **Option B:** Keep title, suggest more appropriate type

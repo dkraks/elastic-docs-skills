@@ -158,7 +158,7 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - **Missing backticks:** Field names, parameters, API endpoints should use `backticks`
 - **UI vs feature uncertainty:** Flag when formatting choice between UI label and feature name is unclear
 
-**5. Type-title alignment issues:**
+**6. Type-title alignment issues:**
 
 Flag when changelog `type` and `title` verb patterns don't align, indicating potential misclassification:
 
@@ -190,7 +190,7 @@ Flag when changelog `type` and `title` verb patterns don't align, indicating pot
 - Type `enhancement` + "Fix Painless score scripts..." → **Flag alignment mismatch**  
 - Type `enhancement` + "Fix ES|QL performance issues..." → **Flag alignment mismatch**
 
-**6. Technical content issues:**
+**7. Technical content issues:**
 
 Flag overly technical titles that focus on implementation details rather than user impact:
 
