@@ -1,0 +1,69 @@
+# Slack message templates
+
+Reference templates for §6 of the docs-stack-release skill. Fill placeholders from issue data (§6.1).
+
+## Feature freeze (multi-release)
+
+If all issues share one anticipated release date, use one date; otherwise list per version.
+
+```markdown
+Hi everyone! :wave: Today is the feature freeze for multiple releases.
+
+The following releases are scheduled to release <ANTICIPATED_DATE>: <VERSION_LIST>
+
+Please add your release note PRs to the issues linked below:
+
+**Releases & related issues**
+
+(Repeat for each issue in the batch:)
+<VERSION> -- [<issue title>](<issue URL>)
+
+---
+
+:bell: **Ping for <VERSION_OR_GROUP_A>**
+
+(One line per product with Slack @mentions equivalent to stakeholders in the issue.)
+
+---
+
+:bell: **Ping for <VERSION_OR_GROUP_B>** *(repeat when 8.x vs 9.x tables differ)*
+```
+
+## Outstanding release notes / merge push
+
+Outstanding rows = Pull Request column still not a merged PR link.
+
+```markdown
+The following stack releases are going forward: <VERSION_LIST>. Please merge any outstanding release note PRs (linked in those issues :point_left:).
+
+**Release note PRs for the following products are still outstanding:**
+
+(Repeat for each outstanding row:)
+<Product> <Stakeholder column from issue>
+
+@<api-docs-person> we can start with the API docs refresh when ready <optional context>.
+```
+
+## Docs released (final / 8.x scrape)
+
+Send after docs are live. Include the exact 8.x semver from the issue for the scrape line. If the batch is **9.x-only**, omit the scrape line.
+
+```markdown
+Docs for stack versions <VERSION_LIST> are all released!
+<Slack @mention> you can start scraping the docs for <8.x_VERSION> now
+```
+
+## Other states
+
+- **Day before:** `#docs` reminder -- reuse Overview dates + issue links; optionally list products still outstanding.
+- **Release day:** Short "merge RNs" / "docs live" -- follow checklist timing; names from stakeholders.
+
+## #mission-control thread reply (release day)
+
+Reply in the "begin publishing" thread after confirming docs are live:
+
+```markdown
+<VERSION_LIST> docs are live.
+```
+
+Keep it short — this thread is noisy and read by many teams.
