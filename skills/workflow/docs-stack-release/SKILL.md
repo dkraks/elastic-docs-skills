@@ -221,7 +221,7 @@ gh issue view <N> -R elastic/dev --json title,url,body -q .
 | **Feature freeze** / merge-by dates | Overview bullets |
 | **Link to this issue** | `url` from JSON or `https://github.com/elastic/dev/issues/<N>` |
 | Who to ping (by product) | **Release notes** table: `Product` + `Stakeholder` -- map each row to Slack mentions |
-| RN PR status | Same table, **Pull Request** column: no URL = **outstanding**; URL present = filed |
+| RN PR status | Same table, **Pull Request** column: no URL = **outstanding**; URL present = filed; "No changes" / "N/A" = **skip**. Products that rarely have changes (e.g. Elasticsearch Hadoop, Fleet & Agent) are **non-blocking** — ping with a hedge ("if applicable") but don't wait on them for the "all merged" gate. |
 
 **Grouping pings:** 8.x and 9.x issues often have **different product rows**. Use **separate** "Ping for ..." sections when tables differ; **merge** duplicate product lines when the same stakeholders apply to multiple versions.
 
