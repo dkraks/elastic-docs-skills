@@ -1,7 +1,7 @@
 ---
 name: docs-review-changelog
-version: 1.5.1
-description: Validate and assess the quality of Elastic changelog YAML files against current Elastic standards. Reports schema errors, content quality issues, systematic pattern violations, type-title alignment mismatches, and overly technical content that needs user-focused rewrites. Features repository-aware area validation. Fetches canonical guidance to stay in sync. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
+version: 1.6.0
+description: Validate and assess the quality of Elastic changelog YAML files against current Elastic standards. Reports schema errors, content quality issues, systematic pattern violations, type-title alignment mismatches, missing product/surface context in titles, description verb-tense issues, and overly technical content that needs user-focused rewrites. Features repository-aware area validation. Fetches canonical guidance to stay in sync. Use when checking or reviewing changelog files before merging — pairs with docs-fix-changelog to get suggested fixes.
 argument-hint: <file-or-directory>
 context: fork
 allowed-tools: Read, Grep, Glob, WebFetch
@@ -126,6 +126,7 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - **No bracket-only team tags:** Replace `[Security Solution]`, `[Query Rules]`, `[Inference]`, and similar with plain, user-facing wording
 - **Strong verbs:** Prefer *Improve validation for...* over *Better validation for...* (use present tense imperative: Fix, Add, Remove)
 - **No buried lede:** If title is vague, fold in concrete detail from description so release notes stand alone
+- **Product/surface context:** Titles scoped to a UI element or workflow must locate the change: `[Verb] [change] [in/on/for] [feature, app, page, tab, flyout, or integration]`. Flag generic nouns (`button`, `metrics`, `monitors`) with no context. Use PR paths/labels, `areas`, and issue titles as context sources
 - **Base-form verb requirement:** Use `Fix`, `Add`, `Remove` (not third-person `Fixes`, `Adds`, `Removes`)
 - **Sentence case:** Follow standard sentence capitalization
 - **Feature/app prefix patterns:** Flag titles with `[Feature/App]: [Action]` patterns that need contextual integration (e.g., "File upload: Fix bug" should integrate the feature contextually). Skip technical terms, API references, code identifiers.
@@ -142,6 +143,8 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - Vague titles that could be more specific based on description content
 - Absent `description` when title is self-explanatory is fine; only flag **present** descriptions that repeat the title, say "See PR", or add no context
 - Implementation-focused phrasing instead of user-visible outcomes
+- **Verb-form split:** Titles use base-form imperative (`Fix`, `Add`). Descriptions, `impact`, and `action` use third-person present (`Fixes`, `Adds`). Flag past tense (`Fixed`, `Added`) and base-form openings in descriptions
+- **Directory mode:** Flag mixed past/present description tense across files in the same run
 
 **4. YAML formatting issues (cross-reference with Step 2):**
 
@@ -155,7 +158,7 @@ These are warnings. The source of truth is the changelogs style guidance linked 
 - **Missing backticks:** Field names, parameters, API endpoints should use `backticks`
 - **UI vs feature uncertainty:** Flag when formatting choice between UI label and feature name is unclear
 
-**5. Type-title alignment issues:**
+**6. Type-title alignment issues:**
 
 Flag when changelog `type` and `title` verb patterns don't align, indicating potential misclassification:
 
@@ -187,7 +190,7 @@ Flag when changelog `type` and `title` verb patterns don't align, indicating pot
 - Type `enhancement` + "Fix Painless score scripts..." → **Flag alignment mismatch**  
 - Type `enhancement` + "Fix ES|QL performance issues..." → **Flag alignment mismatch**
 
-**6. Technical content issues:**
+**7. Technical content issues:**
 
 Flag overly technical titles that focus on implementation details rather than user impact:
 

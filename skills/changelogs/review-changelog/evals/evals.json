@@ -155,6 +155,28 @@
         "Categorizes under quality warnings",
         "Does not auto-fix — report only"
       ]
+    },
+    {
+      "id": 15,
+      "prompt": "Review changelog: type bug-fix, title 'Fix maintenance window name references in monitors', no areas field. PR context mentions Synthetics monitoring as context.",
+      "expected_output": "Flags missing product/surface context in title; does not treat as vague-title-only",
+      "expectations": [
+        "Flags missing product/surface context (especially when there are no areas)",
+        "Notes preferred pattern: [Verb] [change] [in/on/for] [app, page, tab, flyout, or integration]",
+        "Would expect surface like Synthetics monitors from PR context",
+        "Reports under quality warnings, not schema errors"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Review changelog: type bug-fix, title 'Fix Fleet secrets stored inline during package policy bulk create', description: 'Fixed Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.'",
+      "expected_output": "Flags past-tense description; notes third-person present standard (Fixes…)",
+      "expectations": [
+        "Flags past tense Fixed in description",
+        "Notes verb-form split: titles use base-form (Fix); descriptions use third-person present (Fixes)",
+        "Expects Fixes Fleet package policy bulk creation…",
+        "Reports under content quality / quality warnings"
+      ]
     }
   ]
 }

@@ -1,7 +1,7 @@
 ---
 name: docs-fix-changelog
-version: 2.4.2
-description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes type-title alignment checking and technical content assessment to catch overly technical titles that need user-focused rewrites. Features repository-aware area validation and enhanced confidence scoring. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.
+version: 2.5.0
+description: Suggest improved text for changelog YAML files against current Elastic standards. Mirrors the pattern catalog from docs-review-changelog to provide consistent fixes. Includes type-title alignment, product/surface context for titles, description verb-tense (third-person present), and technical content assessment. Features repository-aware area validation and enhanced confidence scoring. Supports single files or directories. Fetches canonical guidance to stay in sync. Use after review identifies quality issues, or when drafting new changelogs.
 argument-hint: "[changelog-file-or-directory] [pr/issue-context]"
 context: fork
 allowed-tools: Read, Grep, Glob, WebFetch
@@ -92,6 +92,12 @@ Context from a PR or issue produces better suggestions. Use it in this order:
 - If the issue title describes a **failure/symptom** (e.g. "causes recovery to fail", "cluster health became red") but the changelog title uses **preventive/restrictive** language (`Don't allow`, `Disallow`, `Prevent`), suggest a symptom-first rewrite using language from the issue title
 - Example: issue *"Adding a runtime field that shadows a sorted field causes recovery to fail"* + changelog "Don't allow runtime fields to shadow fields used in index sort" → suggest "Fix shard recovery failures when runtime fields shadow index sort fields"
 
+**Product/surface extraction (when PR context is available):**
+
+- From PR paths, labels, and body, extract the product surface: app, page, tab, flyout, or integration name
+- If the title lacks that surface (generic nouns like `button`, `metrics`, `response action`), propose a suffix such as `in Synthetics`, `in case details`, or `for Elastic Defend Endpoint`
+- Prefer adding surface context over trimming; move overflow past 80 characters into `description`
+
 ## Step 4: Apply post-edit checklist
 
 Apply the systematic pattern checklist from `docs-review-changelog` (Step 4). Add fix-specific deltas below — do not re-derive the full catalog here.
@@ -144,51 +150,16 @@ Apply the systematic pattern checklist from `docs-review-changelog` (Step 4). Ad
 
 ## Step 4.5: Type-Title Alignment Check
 
-Validate that `type` and `title` verb patterns align (same rules as review Step 4.5). When mismatch detected, provide both options: keep type and rewrite title, or keep title and suggest type change.
+Apply the same type-title alignment rules as `docs-review-changelog` Step 4 item **6** (expected verbs, preventive framing, misalignment flags). Do not restate the verb tables here.
 
-**`bug-fix` / `regression`:**
-
-- **Expected verbs:** `Fix`, `Resolve`, `Correct`
-- **Expected pattern:** "Fix [symptom] in [context]"
-- **Flag if title uses:** `Improve`, `Enable`, `Update`, `Enhance`
-- **Also flag:** `Default`, `Reserve`, `Ensure` without `Fix` — rewrite as **Fix [what was wrong]**
-- **Preventive/restrictive framing:** Flag titles that describe a new restriction or validation rather than the user-visible failure, especially when the title does NOT start with `Fix`, `Resolve`, or `Correct`
-  - **Leading patterns to flag:** `Don't`, `Do not`, `Disallow`, `Prevent`, `Reject`, `Block`, `Forbid`, `Prohibit`, `Restrict`, `No longer allow`
-  - **Warning:** Title explains what is now blocked, not what was broken (recovery failure, query error, cluster red, etc.)
-  - **Suggest:** Rewrite as `Fix [symptom] when [condition]` — e.g. "Don't allow runtime fields to shadow index sort fields" → "Fix shard recovery failures when runtime fields shadow index sort fields"
-  - **Type note:** If the change only adds validation with no prior user-visible failure, consider `enhancement` instead of `bug-fix`
-- **Action:** Suggest either changing type to `enhancement` OR rewriting title to describe what was broken
-
-**`enhancement`:**
-
-- **Expected verbs:** `Improve`, `Update`, `Optimize`, `Enable`, `Expand`, `Enhance`
-- **Expected pattern:** "Improve [capability] for [context]"  
-- **Flag if title uses:** `Fix`, `Resolve`, `Correct`
-- **Action:** Suggest either changing type to `bug-fix` OR rewriting title to focus on improvement/capability
-
-**`feature`:**
-
-- **Expected verbs:** `Add`, `Introduce`, `Enable`, `Support`  
-- **Expected pattern:** "Add [new capability] for [users]"
-- **Flag if title uses:** `Fix`, `Improve` (unless truly new)
-- **Action:** Major new functionality → `feature`. Minor additions → `enhancement`
-
-**`docs`:**
-
-- **Expected verbs:** `Update`, `Add`, `Clarify`, `Document`
-- **Expected pattern:** "Update [documentation] for [clarity/accuracy]"
-
-**`breaking-change` / `deprecation` / `known-issue` / `security`:**
-
-- **Any appropriate verb** but should align with the actual change nature
-- **Focus on clarity** rather than strict verb patterns
+When a mismatch is detected, provide both options: keep type and rewrite title, or keep title and suggest type change. Include a confidence note explaining which option is more likely correct based on PR context.
 
 ### Alignment Assessment Process
 
 For each changelog:
 
 1. **Extract leading verb** from title (first word after articles/prepositions)
-2. **Check against expected verbs** for the declared type
+2. **Check against expected verbs** for the declared type (per review Step 4 item 6)
 3. **If mismatch detected**, provide both options:
    - **Option A:** Keep type, rewrite title with appropriate verb
    - **Option B:** Keep title, suggest more appropriate type
@@ -228,9 +199,10 @@ Evaluate titles for implementation-focused language. Rewrite using `[Fix|Improve
 
 **Mode A & B** — identify fields that need improvement (apply to each file processed):
 
-- `title`: too vague, implementation-focused, wrong tense, missing action verb, or over 80 characters
-- `description`: only suggest when title is vague; do not suggest when title is self-explanatory; flag present low-quality content (repeats title, "See PR", "Internal refactoring")
-- `impact` / `action`: absent on `breaking-change`, `deprecation`, or `known-issue`
+- `title`: too vague, implementation-focused, wrong tense, missing action verb, missing product/surface context, or over 80 characters
+- `description`: only suggest when title is vague **or** tense/quality fails; do not suggest when title is self-explanatory and description tense is fine; flag present low-quality content (repeats title, "See PR", "Internal refactoring")
+- `description` tense: follow review Step 4 verb-form split — third-person present (`Fixes`, `Adds`); flag past tense (`Fixed`, `Added`) and base-form openings; rewrite accordingly
+- `impact` / `action`: absent on `breaking-change`, `deprecation`, or `known-issue`; when present, use third-person present (same verb-form split as description)
 - `areas` if present: must be an array of strings; validate against repository configuration from Step 1 if available (only flag areas not in `docs/changelog.yml` pivot.areas section), otherwise use generic validation
 - `feature-id` if present: must be a string; no content quality check needed, just YAML type correctness
 
@@ -333,7 +305,7 @@ Remind the user that `--products`, `--prs`, `--issues`, and other non-text optio
 - **Title pattern:** "Fix [symptom] in [context]" (base-form verb)
 - **Common misalignment:** Titles that say "Improve" when fixing broken behavior; preventive framing (`Don't allow`, `Disallow`, `Prevent`) instead of symptom-first `Fix [symptom] when [condition]`
 - **Resolution:** If behavior was broken → keep `bug-fix`, rewrite title. If adding new capability → change to `enhancement`. Use issue title language when available (Step 3 cross-check)
-- **Description should explain:** What was wrong, what's now correct
+- **Description should explain:** What was wrong, what's now correct — open with `Fixes…` (third-person present)
 - **Required fields:** `impact` and `action` recommended for regressions
 
 **`enhancement`:**  
@@ -341,14 +313,14 @@ Remind the user that `--products`, `--prs`, `--issues`, and other non-text optio
 - **Title pattern:** "Improve [existing capability]" or "Add [minor capability]"
 - **Common misalignment:** Titles that say "Fix" for performance improvements
 - **Resolution:** If fixing objectively broken behavior → change to `bug-fix`. If optimizing working functionality → keep `enhancement`, rewrite title
-- **Description should explain:** What users can now do better/faster
+- **Description should explain:** What users can now do better/faster — open with `Improves…` / `Enables…`
 
 **`feature`:**
 
 - **Title pattern:** "Add [substantial new capability]"  
 - **Common misalignment:** Minor improvements labeled as features
 - **Resolution:** Major new functionality → `feature`. Minor additions → `enhancement`
-- **Description should explain:** What users can now do that they couldn't before
+- **Description should explain:** What users can now do that they couldn't before — open with `Adds…` / `Enables…`
 
 **`breaking-change`:**
 
