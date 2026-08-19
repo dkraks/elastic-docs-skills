@@ -238,6 +238,7 @@ Use the `user-slack` MCP server to resolve GitHub handles to Slack users:
 1. Check the issue template for a Slack handle mapping (often in stakeholder tables).
 2. For unmapped handles: `slack_search_users` (server: `user-slack`, query by display name or real name).
 3. If the match is confident (exact display name or single result): use it. If uncertain: show `[@handle]` placeholder and ask the user to confirm.
+4. **Always resolve to user IDs.** Slack messages must use `<@USER_ID>` format (e.g. `<@U07EN8ZFRTL>`) to actually ping someone. Display names like `@wajiha` do NOT resolve — they render as plain text.
 
 ### 6.4 Sending messages (via MCP, with confirmation)
 
@@ -246,9 +247,17 @@ All Slack messages go through this flow:
 1. Draft the message using the templates in [slack-templates.md](./slack-templates.md).
 2. Show it to the user: "Here's what I'll post to `#docs`: \n[message preview]\nSend?"
 3. On user confirmation: `slack_send_message` (server: `user-slack`, channel: target channel ID).
-4. Report: "Sent to #docs."
+4. **Threading:** All follow-up messages for a release (outstanding RNs, day-before reminder, docs released) should be sent as both a **thread reply** to the original FF announcement AND posted **to channel** (set `reply_broadcast: true` or send as a threaded reply that also posts to channel). This keeps the release context grouped but still visible.
+5. Report: "Sent to #docs (threaded on the FF announcement)."
 
 **Never send without confirmation.** If the user says "send it" or "looks good", that counts.
+
+**Formatting rules for Slack messages:**
+- **Mentions:** Use `<@USER_ID>` (e.g. `<@U07EN8ZFRTL>`). Display names don't resolve.
+- **Links:** Use `<URL|display text>` (e.g. `<https://github.com/elastic/dev/issues/3600|tracking issue>`). Markdown `[text](url)` does NOT render.
+- **Bold:** `*bold*` (not `**bold**`). **Italic:** `_italic_`. **Strikethrough:** `~text~`.
+
+To thread: find the original FF announcement `message_ts` from the channel (use `slack_read_channel` or `slack_search_public` for the version number in `#docs`), then send with `thread_ts` set to that timestamp.
 
 ### 6.5 Replying in #mission-control threads (release day)
 
