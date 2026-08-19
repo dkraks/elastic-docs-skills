@@ -233,6 +233,8 @@ gh issue view <N> -R elastic/dev --json title,url,body -q .
 
 **Grouping pings:** 8.x and 9.x issues often have **different product rows**. Use **separate** "Ping for ..." sections when tables differ; **merge** duplicate product lines when the same stakeholders apply to multiple versions.
 
+**Unresolved assignments:** When the issue body has placeholders (e.g. `Beats point person`, `API docs point person`), check the #docs Slack thread for the FF announcement — people often confirm coverage there without updating the issue. Use `slack_read_thread` on the FF message to find who volunteered, then use the Slack username lookup table (in the issue appendix) to reverse-map their Slack name to a GitHub handle and update the issue body so it stays the source of truth.
+
 ### 6.2 Templates
 
 Use the templates in [slack-templates.md](./slack-templates.md). Fill placeholders from §6.1 data. If the user's request doesn't specify which reminder type, present the options: feature freeze, outstanding RNs, docs released, or other.
@@ -294,9 +296,10 @@ When the user says "watch the PRs" or "let me know when they're all merged":
 ## Quality checklist (pre-flight before each PR, issue edit, or Slack post)
 
 - [ ] Every issue number and PR URL comes from `gh` or the user -- none invented.
+- [ ] Every @mention and handle comes from the issue body, Slack thread, or lookup table -- none invented.
 - [ ] Same-GA batch: canonical identified, lower-line superseded correctly.
 - [ ] Dev issue edits preserve template structure (placeholders, footnotes, stakeholder tables intact).
-- [ ] Slack @mentions are Slack-equivalent -- no raw GitHub handles.
+- [ ] GitHub and Slack handles are mapped correctly in both directions (use the lookup table). For Slack messages: GitHub handle → Slack user ID. For issue updates: Slack name → GitHub handle. Never assume they're the same. If someone isn't in the table, ask the user.
 
 ---
 
