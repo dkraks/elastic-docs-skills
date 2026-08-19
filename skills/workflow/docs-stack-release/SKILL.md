@@ -1,6 +1,6 @@
 ---
 name: docs-stack-release
-version: 1.3.0
+version: 1.4.0
 description: >-
   Coordinate Elastic Stack docs releases: classify versions, route 8.x vs 9.x
   PRs, edit elastic/dev tracking issues, handle same-GA supersession, and draft
@@ -59,7 +59,7 @@ gh issue view <N> -R elastic/dev --json body -q .body
 ```
 
 - **Coordinator PRs:** Which exist, which are open/merged/draft?
-- **Issue checkboxes:** Which checklist items are checked (done) vs unchecked (pending)?
+- **Issue checkboxes:** Which checklist items are checked (done) vs unchecked (pending)? If an item is unchecked but this skill already completed it (a Slack message you sent, a PR you opened), check it now using §4. Do not ask. Do not check items for work this skill did not do.
 - **RN PR status:** For each PR URL in the dev issue's Release Notes table, check merge state:
 
 ```bash
@@ -192,7 +192,21 @@ Multiple 9.x versions may share a GA date, but only one will be a minor — the 
 - Main trail in the **description**, not comments.
 - Do **not** delete template placeholders, footnotes, or stakeholder tables -- only add checkmarks, links, strikethrough, short cross-refs.
 - Use **real** `#` / PR URLs from `gh` or the user -- **never** guess numbers.
-- **After each coordinator PR:** immediately update the matching issue -- check the line for that PR and paste the **PR URL** on the template line (minors: post-FF vs version-bump have **different** URLs on different lines).
+- **Check off as you go.** After completing any skill-flow action that matches a checklist item, immediately check that item. Nested boxes that belong to the same action get checked together. Do not wait to be asked. Do not report the item as pending.
+- **Do not check items you did not complete.** Other teams' steps, user-completed work outside this skill, and future release-day items stay unchecked.
+- **After each coordinator PR this skill opens:** check the parent and nested lines for that PR and paste the **PR URL** on the template line (minors: post-FF vs version-bump have **different** URLs on different lines).
+
+Match by checklist wording, not by assuming one template. Typical mappings:
+
+| Skill action | Checklist line |
+|--------------|----------------|
+| Outstanding-RNs / day-before `#docs` ping sent | Post in #docs to remind ... PRs that have not been opened and/or approved |
+| Coordinator PR opened | Open a PR ... plus the nested versions.yml / assembler.yml / conf.yaml line |
+| Merge-RN `#docs` ping sent | Post in #docs ... they can merge their release note PRs |
+| Docs-eng ping that release started | Let the Docs engineering point person know that the release process has started |
+| Coordinator PR merged | Merge the docs-builder config PR (or the 8.x equivalent) |
+| User confirmed docs live | Confirm that the updated docs appear on the website |
+| `#mission-control` "docs are live" reply | Post in #mission-control that the docs are live |
 
 **Fetch -> edit -> push**
 
@@ -225,6 +239,8 @@ gh pr create -R elastic/<repo> --draft --base main --head <branch> \
 ```
 
 Mark **ready** only in the right window. Re-draft: `gh pr ready <num> -R elastic/<repo> --undo`.
+
+Immediately after the PR exists: check the matching docs-issue lines and paste the PR URL (§4).
 
 ---
 
@@ -279,7 +295,7 @@ All Slack messages go through this flow:
 2. Show it to the user: "Here's what I'll post to `#docs`: \n[message preview]\nSend?"
 3. On user confirmation: `slack_send_message` (server: `user-slack`, channel: target channel ID).
 4. **Threading:** All follow-up messages for a release (outstanding RNs, day-before reminder, docs released) should be sent as both a **thread reply** to the original FF announcement AND posted **to channel** (set `reply_broadcast: true` or send as a threaded reply that also posts to channel). This keeps the release context grouped but still visible.
-5. Report: "Sent to #docs (threaded on the FF announcement)."
+5. Check the matching docs-issue checklist item (§4). Then report: "Sent to #docs (threaded on the FF announcement). Checked [checklist line] on #[issue]."
 
 **Never send without confirmation.** If the user says "send it" or "looks good", that counts.
 
@@ -296,7 +312,8 @@ When the user confirms docs are live:
 
 1. Find the "begin publishing" message for that version in `#mission-control` (from §0 status check -- note the `message_ts`).
 2. Reply in thread: `slack_send_message` with `thread_ts` set to that message's timestamp. Content: "X.Y.Z docs are live."
-3. Then draft + send the `#docs` "docs released" message via the confirmation flow above.
+3. Check the matching docs-issue items (§4): confirm docs appear, and post in #mission-control that the docs are live.
+4. Then draft + send the `#docs` "docs released" message via the confirmation flow above.
 
 ---
 
@@ -318,6 +335,7 @@ When the user says "watch the PRs" or "let me know when they're all merged":
 - [ ] Every issue number and PR URL comes from `gh` or the user -- none invented.
 - [ ] Every @mention and handle comes from the issue body, Slack thread, or lookup table -- none invented.
 - [ ] Same-GA batch: canonical identified, lower-line superseded correctly.
+- [ ] Matching checklist items were checked immediately after the skill-flow action that completed them.
 - [ ] Dev issue edits preserve template structure (placeholders, footnotes, stakeholder tables intact).
 - [ ] GitHub and Slack handles are mapped correctly in both directions (use the lookup table). For Slack messages: GitHub handle → Slack user ID. For issue updates: Slack name → GitHub handle. Never assume they're the same. If someone isn't in the table, ask the user.
 
@@ -347,8 +365,8 @@ When the user says "watch the PRs" or "let me know when they're all merged":
 1. Gather inputs (only for what §0 didn't already surface) -> classification table (§2–3).
 2. If same-GA multi 9.x -> identify canonical and plan supersession on lower-line issue.
 3. Open **draft** PRs in schedule order; **9.x minor** = two PRs before marking both steps done.
-4. After **each** PR: update the matching dev issue (§4).
-5. **Reminders & messages** (§6): draft via templates, send via Slack MCP (with confirmation), reply in `#mission-control` thread when confirming "docs live".
+4. After **each** skill-flow action (PR, Slack post, merge, docs-live confirm): check the matching checklist item on the docs issue (§4).
+5. **Reminders & messages** (§6): draft via templates, send via Slack MCP (with confirmation), reply in `#mission-control` thread when confirming "docs live", then check the matching boxes.
 6. **PR watch loop** (optional, §7): start background poller if user requests. On next invocation, re-run §0 to pick up new merges.
 7. For anything not specified here (API docs, Buildkite, deploy repo): follow the dev issue checklist and playbooks.
 
