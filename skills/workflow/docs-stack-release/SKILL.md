@@ -239,6 +239,7 @@ Use the `user-slack` MCP server to resolve GitHub handles to Slack users:
 2. For unmapped handles: `slack_search_users` (server: `user-slack`, query by display name or real name).
 3. If the match is confident (exact display name or single result): use it. If uncertain: show `[@handle]` placeholder and ask the user to confirm.
 4. **Always resolve to user IDs.** Slack messages must use `<@USER_ID>` format (e.g. `<@U07EN8ZFRTL>`) to actually ping someone. Display names like `@wajiha` do NOT resolve — they render as plain text.
+5. **Check availability before pinging.** For each resolved user, call `slack_read_user_profile` to check their status. If their status suggests they're unavailable (e.g. :palm_tree:, "OOO", "On vacation", "PTO", :face_with_thermometer:, :no_entry:), flag it: "Heads up: [name] appears to be out ([status]). Who should cover for them?" Do this before drafting the message.
 
 ### 6.4 Sending messages (via MCP, with confirmation)
 

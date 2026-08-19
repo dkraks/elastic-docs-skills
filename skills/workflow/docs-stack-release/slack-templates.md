@@ -29,19 +29,27 @@ Please add your release note PRs to the issues linked below:
 :bell: **Ping for <VERSION_OR_GROUP_B>** *(repeat when 8.x vs 9.x tables differ)*
 ```
 
-## Outstanding release notes / merge push
+## Outstanding release notes (day before)
 
-Outstanding rows = Pull Request column still not a merged PR link.
+Day-before reminder for PRs not yet filed or approved.
 
 ```markdown
-The following stack releases are going forward: <VERSION_LIST>. Please merge any outstanding release note PRs (linked in those issues :point_left:).
-
-**Release note PRs for the following products are still outstanding:**
+The <VERSION_LIST> release is scheduled for tomorrow. The following release note PRs are still outstanding:
 
 (Repeat for each outstanding row:)
-<Product> <Stakeholder column from issue>
+• <Product> <Stakeholder @mention>
 
-@<api-docs-person> we can start with the API docs refresh when ready <optional context>.
+Please file and/or get approval on your PRs today. Tracking issue: <ISSUE_LINK>
+```
+
+## Merge release notes (release day)
+
+Release-day message: the release has kicked off and teams can merge.
+
+```markdown
+The <VERSION_LIST> release has kicked off. If you haven't already, you can merge your release notes PRs.
+
+<@api-docs-person> it is safe to update APIs.
 ```
 
 ## Docs released (final / 8.x scrape)
