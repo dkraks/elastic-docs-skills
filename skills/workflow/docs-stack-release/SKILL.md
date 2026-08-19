@@ -11,7 +11,11 @@ argument-hint: <versions and/or issue numbers>
 sources:
   - https://github.com/elastic/dev
   - https://github.com/elastic/docs-builder
-  - https://github.com/elastic/docs-content-internal/tree/main/docs/releases
+  - https://github.com/elastic/docs-content-internal/blob/main/docs/releases/elastic-stack-v9.md
+  - https://github.com/elastic/docs-content-internal/blob/main/docs/releases/elastic-stack-v8.md
+  - https://github.com/elastic/dev/blob/main/.github/ISSUE_TEMPLATE/docs-release.md
+  - https://github.com/elastic/dev/blob/main/.github/ISSUE_TEMPLATE/docs-patch-release.md
+  - https://github.com/elastic/dev/blob/main/.github/ISSUE_TEMPLATE/docs-patch-release-8.x.md
 allowed-tools: Read, Write, Glob, Bash(gh *), Bash(git *), CallMcpTool
 ---
 
@@ -185,6 +189,10 @@ gh issue edit <N> -R elastic/dev --body-file /tmp/dev-issue.md
 - RN-only coordinator steps may stay **open** on the lower-line issue where they mean "verify/publish **this** version's release notes"; strike only lines that **duplicate** canonical deploy work.
 
 PR opened against the wrong issue's path: close with **Superseded by `owner/repo#N`**.
+
+---
+
+## 5. Open coordinator PRs (`elastic/docs` / `elastic/docs-builder`)
 
 Create a branch, make the changes per the playbook, commit, and push. Then open the PR:
 
