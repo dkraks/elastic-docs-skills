@@ -68,6 +68,26 @@ gh pr view <url> --json state,mergedAt,title
 
 Report: X/Y merged, Z outstanding. **When all are merged:** "All RN PRs merged -- ready to check prod and confirm docs are live."
 
+### Resolve stakeholder assignments
+
+On every invocation, check the RN table for rows that need resolution:
+
+1. **Placeholder:** Stakeholder is a backtick-wrapped placeholder (e.g. `` `Beats point person` ``) or has a footnote pointing to "edit the table to specify..."
+2. **Multiple assignees:** Row lists 2+ people and one person confirmed in the thread they're doing it — narrow to just them.
+3. **Coverage change:** Named stakeholder is out/unavailable and someone else confirmed they're covering.
+
+**Resolution flow:**
+
+1. Find the FF announcement thread (`slack_search_public` for the version in `#docs`, then `slack_read_thread`).
+2. Scan replies for confirmations: "I can handle [product]", "I'll do [product]", "I'm drafting the X.Y.Z [product] release notes", or someone explicitly covering for another person.
+3. For each confirmed person: reverse-map their Slack display name to a GitHub handle via the lookup table in the issue appendix. If not in the table, use `slack_search_users` to find them and ask the user for their GitHub handle.
+4. Update the issue body (§4 flow): replace the placeholder, narrow multiple assignees to the confirmed person, or swap in the covering person.
+5. Report: "Updated [Product] stakeholder: [old] → @new-handle (confirmed in thread)."
+
+If no confirmation found, leave as-is and flag in the status report.
+
+**Do not guess.** If the match is ambiguous (e.g. "I can help" without specifying which product), ask the user.
+
 ### #mission-control (release day only)
 
 Read recent messages from `#mission-control` (channel `C0JFN9HJL`) via Slack MCP (`user-slack` server, `slack_read_channel`, limit 30). Look for these signals matching the tracked versions:
@@ -233,7 +253,7 @@ gh issue view <N> -R elastic/dev --json title,url,body -q .
 
 **Grouping pings:** 8.x and 9.x issues often have **different product rows**. Use **separate** "Ping for ..." sections when tables differ; **merge** duplicate product lines when the same stakeholders apply to multiple versions.
 
-**Unresolved assignments:** When the issue body has placeholders (e.g. `Beats point person`, `API docs point person`), check the #docs Slack thread for the FF announcement — people often confirm coverage there without updating the issue. Use `slack_read_thread` on the FF message to find who volunteered, then use the Slack username lookup table (in the issue appendix) to reverse-map their Slack name to a GitHub handle and update the issue body so it stays the source of truth.
+**Unresolved stakeholders** are resolved automatically in §0. If any remain unresolved at message-draft time, use `[@handle]` placeholders and ask the user.
 
 ### 6.2 Templates
 
