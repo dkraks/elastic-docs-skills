@@ -1,6 +1,6 @@
 ---
 name: docs-stack-release
-version: 1.5.4
+version: 1.5.5
 description: >-
   Coordinate Elastic Stack docs releases: classify versions, route 8.x vs 9.x
   PRs, edit elastic/dev tracking issues, handle same-GA supersession, draft
@@ -65,8 +65,8 @@ Persist discovery IDs across chats so a new window does not re-search GitHub and
 
 1. Try to read the file. Fall back to scratch if it is missing, unreadable, invalid JSON, has no matching version, is older than **14 days**, the cached docs issue 404s, or the user says "start fresh".
 2. Use cached **IDs only** to skip discovery: docs/eng issue numbers, coordinator PR numbers, RN PR URLs, Slack channel IDs, thread timestamps, Slack user IDs, config SHA, bump PR numbers, deploy run IDs.
-3. **Always refresh live status** from those IDs (`gh issue view`, `gh pr view`, `gh run view`, `slack_read_thread`). Never trust cached merge/deploy conclusions.
-4. If a cached ID fails (404, missing message), drop that field and rediscover just that piece -- do not throw away the rest of the file.
+3. **Live-refresh only what the docs issue still has open** (see §0.2). The issue checklist is the step index -- do not re-`gh pr view` / `gh run view` lines that are already checked. Always live-refresh RN PR merge state (the table stores URLs, not merge). Never trust *cached JSON* for merge/deploy conclusions; do trust a **checked issue line that already cites a PR or run URL**.
+4. If a cached ID fails (404, missing message), drop that field and rediscover just that piece -- do not throw away the rest of the file. Empty `slack_read_thread` on a Buildkite/bot parent (`begin publishing`, `release build declared`) is **not** a 404 -- those messages usually have no replies.
 5. At the end of §0, write the file back with `updatedAt` set to now.
 
 **Schema (keep unknown fields):**
@@ -110,19 +110,41 @@ Persist discovery IDs across chats so a new window does not re-search GitHub and
 
 `deploys` is **9.x only**. Omit it for 8.x / 7.x entries.
 
+### 0.2 Stage from the docs issue (do this before extra fetches)
+
+The **docs release issue checklist is the step index.** After session state, the first GitHub call is `gh issue view`. Parse checkboxes immediately. Jump to that stage. Do not walk §1–§5. Do not re-verify checked lines.
+
+| If the issue shows | Stage | Live-fetch only |
+| --- | --- | --- |
+| Day-before ping or coordinator-PR box **unchecked** | pre-release | Coordinator PR search (if no cached number) + RN table URLs. Skip `#mission-control` and §0.3. |
+| Coordinator PR **checked**, merge-RN ping **unchecked** | waiting to tell writers | RN PR states + (release day only) cached `#mission-control` threads. |
+| Config-merge / prod-bump (9.x) / `elastic/docs` PR (8.x) **unchecked** | waiting on publish infra | That PR/deploy (§0.3 for 9.x) + RN PR states + cached `#mission-control` threads. |
+| Prod-bump line **checked** with a run URL (9.x), or `elastic/docs` merge **checked** (8.x) | waiting on RNs / announce | **RN PR merge states only.** Skip `gh pr view` on the coordinator PR, skip bump PRs, skip `gh run view`. |
+| Website-confirm and `#mission-control` live boxes **checked** | announced | Report done. No extra fetches unless the user asks. |
+
+**RN merge is never a checkbox.** Always `gh pr view` each blocking RN URL from the table -- that is the only status that is stale on the issue.
+
+If a checked line's cited URL 404s, rediscover **that line only**.
+
+Stakeholder resolution (§ below): run **only** when a row still has a placeholder, a "specify who's responsible" footnote, or 2+ named people. Skip the `#docs` FF-thread search when every row already has a single named stakeholder.
+
 ### GitHub state
 
-If session state has the docs issue number, `gh issue view` it directly. Otherwise search.
+If session state has the docs issue number, `gh issue view` it directly. Otherwise search. **Do not** `gh pr list` by version if the issue (or session state) already has the coordinator PR URL.
 
 ```bash
 gh issue view <N> -R elastic/dev --json body -q .body
+```
+
+Search coordinator PRs only when §0.2 still needs them:
+
+```bash
 gh pr list -R elastic/docs-builder --search "<version>" --json number,title,state,url
 gh pr list -R elastic/docs --search "<version>" --json number,title,state,url
 ```
 
-- **Coordinator PRs:** Which exist, which are open/merged/draft?
-- **Issue checkboxes:** Which checklist items are checked (done) vs unchecked (pending)? If an item is unchecked but this skill already completed it (a Slack message you sent, a PR you opened), check it now using §4. Do not ask. Do not check items for work this skill did not do.
-- **RN PR status:** For each PR URL in the dev issue's Release Notes table, check merge state:
+- **Issue checkboxes:** Map to a stage per §0.2. If an item is unchecked but this skill already completed it (a Slack message you sent, a PR you opened), check it now using §4. Do not ask. Do not check items for work this skill did not do.
+- **RN PR status:** For each PR URL in the dev issue's Release Notes table, check merge state (one shell loop, all URLs):
 
 ```bash
 gh pr view <url> --json state,mergedAt,title
@@ -132,8 +154,8 @@ gh pr view <url> --json state,mergedAt,title
 
 Report: X/Y merged (skipping N/A rows), Z outstanding. **When all blocking RN PRs are merged:** "All RN PRs merged."
 
-**Then, by line:**
-- **9.x:** After the `docs-builder` coordinator PR is merged, continue to §0.3.
+**Then, by line -- only if §0.2 says publish infra is still open:**
+- **9.x:** After the `docs-builder` coordinator PR is merged **and** the prod-bump issue line is still unchecked, continue to §0.3. If that line is already checked with a run URL, skip §0.3.
 - **8.x / 7.x:** Skip §0.3. Config lives in `elastic/docs` (`conf.yaml` / versions). There is no `docs-internal-workflows` bump or deploy to watch.
 
 ### Resolve stakeholder assignments
@@ -144,7 +166,7 @@ On every invocation, check the RN table for rows that need resolution:
 2. **Multiple assignees:** Row lists 2+ people and one person confirmed in the thread they're doing it — narrow to just them.
 3. **Coverage change:** Named stakeholder is out/unavailable and someone else confirmed they're covering.
 
-**Resolution flow:**
+**Resolution flow:** Skip this Slack search when §0.2 says every row already has a single named stakeholder.
 
 1. Find the FF announcement thread (`slack_search_public` for the version in `#docs`, then `slack_read_thread`).
 2. Scan replies for confirmations: "I can handle [product]", "I'll do [product]", "I'm drafting the X.Y.Z [product] release notes", or someone explicitly covering for another person.
@@ -158,9 +180,15 @@ If no confirmation found, leave as-is and flag in the status report.
 
 ### #mission-control (release day only)
 
-If session state has thread timestamps, `slack_read_thread` those first. Only search the channel if a cached ts is missing or the thread 404s.
+If session state has thread timestamps, `slack_read_thread` those first.
 
-Read recent messages from `#mission-control` (channel `C0JFN9HJL`) via Slack MCP (`user-slack` server, `slack_read_channel`, limit 30). Look for these signals matching the tracked versions:
+**Do not** `slack_read_channel` the whole of `#mission-control` (it is dominated by CVE/SLO bot noise). **Do not** `slack_search_public` for `"begin publishing"` without a version **and** `after:` today's date -- unscoped search returns years of other releases.
+
+Empty thread on `beginPublishingTs` / `releaseBuildDeclaredTs` is expected for Buildkite bot posts. Treat the parent message as the signal; do not rediscover.
+
+Only search or read the channel when a **needed** cached ts is missing (not merely an empty thread): `slack_search_public` query like `9.5.2 in:#mission-control after:YYYY-MM-DD`, limit 5.
+
+Look for these signals matching the tracked versions:
 
 1. **Coordination thread:** Messages matching "Coordination for ... release, scheduled on" -- read the thread (`slack_read_thread`) for timing, who's RC (varies each release -- never assume), and schedule changes in replies. Include the Slack thread link in your status report.
 2. **"release build declared":** "We are officially declaring X.Y.Z as the release build" -- confirms the release is proceeding. Include thread link.
@@ -172,7 +200,9 @@ When reporting status, always link to the relevant Slack threads so the user can
 
 **Skip this section for 8.x / 7.x.** Those releases do not use `docs-internal-workflows`. Do not search that repo, do not poll bump PRs or version-bump runs, and do not require a "prod version-bump deploy" for 8.x live messages.
 
-For **9.x**, after the `docs-builder` coordinator PR merges:
+**Skip §0.3** when the docs issue already checks the Docs engineering "Update the version in staging and production" line (or equivalent) and cites a successful prod run URL. Do not re-list bump PRs or re-view runs.
+
+For **9.x**, after the `docs-builder` coordinator PR merges **and** that issue line is still unchecked:
 
 PRs: https://github.com/elastic/docs-internal-workflows/pulls
 
@@ -487,7 +517,7 @@ After the **9.x** `docs-builder` coordinator PR is merged (or when the user asks
 | **Lower-line issue** | Lower semver 9.x same GA -- RNs here; config steps supersede to canonical. |
 | **GA / FF** | Dates on the docs release issue, eng release issue, or from the user per the global rule. |
 | **RC** | Release coordinator for the eng release (varies each release -- read from `#mission-control` coordination thread or eng issue). |
-| **Session state** | Local JSON cache at `~/.elastic-docs/stack-release-state.json` -- IDs only; live status is always refreshed. |
+| **Session state** | Local JSON cache at `~/.elastic-docs/stack-release-state.json` -- IDs only. Live-refresh open work per §0.2; trust checked issue lines that cite URLs. |
 
 **Roles:** Docs coordinator (you) opens PRs and edits dev issues. **Docs engineering** merges docs-builder, releases, deploy bumps -- coordinate with them; don't assume you merge unless agreed. **RC** (release coordinator) is identified from `#mission-control` -- never hardcode a name.
 
@@ -497,9 +527,9 @@ After the **9.x** `docs-builder` coordinator PR is merged (or when the user asks
 
 0. **Check status** (every invocation when versions/issues are known, including from session state):
    - Load `~/.elastic-docs/stack-release-state.json` (§0.1); fall back to scratch if unusable.
-   - GitHub: existing coordinator PRs (`docs-builder` for 9.x, `elastic/docs` for 8.x), issue checkbox state, RN PR merge status (URL present = blocking).
-   - `#mission-control` (release day): coordination thread, "release build declared", "begin publishing".
-   - **9.x only**, after docs-builder merge: bump PRs + prod version-bump deploy (§0.3). Skip for 8.x.
+   - `gh issue view` the docs issue. Derive stage from checkboxes (§0.2). **Start there.** Do not re-fetch checked lines.
+   - Live-fetch only what that stage still needs (usually: RN PR merge states; plus §0.3 only if the prod-bump line is still open).
+   - `#mission-control` (release day): cached coordination / begin-publishing / build-declared timestamps only. Do not dump the channel.
    - Write session state back. Summarize, propose next actions.
 1. Gather inputs (only for what §0 didn't already surface) -> classification table (§2–3).
 2. If same-GA multi 9.x -> identify canonical and plan supersession on lower-line issue.
