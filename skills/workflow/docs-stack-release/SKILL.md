@@ -1,16 +1,18 @@
 ---
 name: docs-stack-release
-version: 1.4.0
+version: 1.5.2
 description: >-
   Coordinate Elastic Stack docs releases: classify versions, route 8.x vs 9.x
-  PRs, edit elastic/dev tracking issues, handle same-GA supersession, and draft
-  Slack #docs reminders. Use when coordinating docs releases, opening coordinator
-  PRs, editing elastic/dev issues, drafting release reminders, or working with
+  PRs, edit elastic/dev tracking issues, handle same-GA supersession, draft
+  Slack #docs reminders, and watch docs-internal-workflows deploys. Use when
+  coordinating docs releases, checking release status, opening coordinator PRs,
+  editing elastic/dev issues, drafting release reminders, or working with
   assembler.yml, versions.yml, or conf.yaml.
 argument-hint: <versions and/or issue numbers>
 sources:
   - https://github.com/elastic/dev
   - https://github.com/elastic/docs-builder
+  - https://github.com/elastic/docs-internal-workflows
   - https://github.com/elastic/docs-content-internal/blob/main/docs/releases/elastic-stack-v9.md
   - https://github.com/elastic/docs-content-internal/blob/main/docs/releases/elastic-stack-v8.md
   - https://github.com/elastic/dev/blob/main/.github/ISSUE_TEMPLATE/docs-release.md
@@ -40,22 +42,77 @@ Never put **8.x and 9.x edits in one PR**.
 
 ## Inputs
 
-`$ARGUMENTS` is a space-separated list of semver versions and/or `elastic/dev` issue numbers (e.g. `9.4.0 9.3.4 8.19.15` or `#1234 #1235` or `1234 1235`). If empty, ask the user what releases to coordinate.
+`$ARGUMENTS` is a space-separated list of semver versions and/or `elastic/dev` issue numbers (e.g. `9.4.0 9.3.4 8.19.15` or `#1234 #1235` or `1234 1235`). If empty: load session state (§0.1). If it has an **active** release (anticipated date is today, in the last 2 days, or tomorrow), use that. Otherwise ask.
 
-The skill supports partial invocation -- the user may jump directly to reminders (§7) or PR creation (§5) without running the full pipeline. Match the user's request to the relevant section.
+The skill supports partial invocation -- the user may jump directly to reminders (§6), PR creation (§5), or status (§0) without running the full pipeline. Match the user's request to the relevant section.
 
 ---
 
 ## 0. Check status (run on every invocation)
 
-When versions or issue numbers are known, check the current state before proposing actions.
+When versions or issue numbers are known (from `$ARGUMENTS` or session state), check the current state before proposing actions.
+
+### 0.1 Session state (fast path)
+
+Persist discovery IDs across chats so a new window does not re-search GitHub and Slack from scratch.
+
+**Path:** `~/.elastic-docs/stack-release-state.json` (create the directory if needed). This file is local coordinator cache -- never commit it.
+
+**On every invocation:**
+
+1. Try to read the file. Fall back to scratch if it is missing, unreadable, invalid JSON, has no matching version, is older than **14 days**, the cached docs issue 404s, or the user says "start fresh".
+2. Use cached **IDs only** to skip discovery: docs/eng issue numbers, coordinator PR numbers, RN PR URLs, Slack channel IDs, thread timestamps, Slack user IDs, config SHA, bump PR numbers, deploy run IDs.
+3. **Always refresh live status** from those IDs (`gh issue view`, `gh pr view`, `gh run view`, `slack_read_thread`). Never trust cached merge/deploy conclusions.
+4. If a cached ID fails (404, missing message), drop that field and rediscover just that piece -- do not throw away the rest of the file.
+5. At the end of §0, write the file back with `updatedAt` set to now.
+
+**Schema (keep unknown fields):**
+
+```json
+{
+  "updatedAt": "2026-08-20T12:00:00Z",
+  "active": ["9.5.2"],
+  "releases": {
+    "9.5.2": {
+      "docsIssue": 3600,
+      "engIssue": 3599,
+      "line": "9.x",
+      "type": "patch",
+      "anticipatedDate": "2026-08-20",
+      "coordinatorPrs": {
+        "docs-builder": { "number": 3883, "sha": "131d9437" }
+      },
+      "rnPrs": [
+        { "product": "Kibana", "url": "https://github.com/elastic/kibana/pull/286098" }
+      ],
+      "slack": {
+        "docsChannelId": "C0JF80CJZ",
+        "docsFfThreadTs": "1786984771.235929",
+        "missionControlChannelId": "C0JFN9HJL",
+        "coordinationThreadTs": "1787144311.263079",
+        "beginPublishingTs": "1787218744.125039",
+        "handles": { "georgewallace": "U06JAP610CE" }
+      },
+      "deploys": {
+        "configSha": "131d9437",
+        "stagingBumpPr": 750,
+        "prodBumpPr": 751,
+        "stagingRunId": 32367375247,
+        "prodRunId": 32367236554
+      }
+    }
+  }
+}
+```
 
 ### GitHub state
 
+If session state has the docs issue number, `gh issue view` it directly. Otherwise search.
+
 ```bash
+gh issue view <N> -R elastic/dev --json body -q .body
 gh pr list -R elastic/docs-builder --search "<version>" --json number,title,state,url
 gh pr list -R elastic/docs --search "<version>" --json number,title,state,url
-gh issue view <N> -R elastic/dev --json body -q .body
 ```
 
 - **Coordinator PRs:** Which exist, which are open/merged/draft?
@@ -66,7 +123,9 @@ gh issue view <N> -R elastic/dev --json body -q .body
 gh pr view <url> --json state,mergedAt,title
 ```
 
-Report: X/Y merged, Z outstanding. **When all are merged:** "All RN PRs merged -- ready to check prod and confirm docs are live."
+**Skip vs blocking:** A row is **skip** only when the Pull Request cell is `No changes`, `N/A`, or equivalent. If a **PR URL is present, it is blocking** until merged -- do not exempt Fleet, Agent, or any other product by name.
+
+Report: X/Y merged (skipping N/A rows), Z outstanding. **When all blocking RN PRs are merged:** "All RN PRs merged." On release day after the docs-builder PR is merged, continue to §0.3 rather than asking the user to "check prod" by hand.
 
 ### Resolve stakeholder assignments
 
@@ -90,6 +149,8 @@ If no confirmation found, leave as-is and flag in the status report.
 
 ### #mission-control (release day only)
 
+If session state has thread timestamps, `slack_read_thread` those first. Only search the channel if a cached ts is missing or the thread 404s.
+
 Read recent messages from `#mission-control` (channel `C0JFN9HJL`) via Slack MCP (`user-slack` server, `slack_read_channel`, limit 30). Look for these signals matching the tracked versions:
 
 1. **Coordination thread:** Messages matching "Coordination for ... release, scheduled on" -- read the thread (`slack_read_thread`) for timing, who's RC (varies each release -- never assume), and schedule changes in replies. Include the Slack thread link in your status report.
@@ -98,14 +159,55 @@ Read recent messages from `#mission-control` (channel `C0JFN9HJL`) via Slack MCP
 
 When reporting status, always link to the relevant Slack threads so the user can jump there directly (format: channel link + message timestamp).
 
+### 0.3 Watch `docs-internal-workflows` (after docs-builder PR merges)
+
+PRs: https://github.com/elastic/docs-internal-workflows/pulls
+
+Merging the coordinator `docs-builder` PR (config SHA = merge commit short SHA) automatically opens bump PRs titled:
+
+- `[bump] [staging] docs-builder configuration: <sha>`
+- `[bump] [prod] docs-builder configuration: <sha>`
+
+Then those merges kick off deploys named like `Staging / Docs / Deploy / version-bump / ...` and `Prod / Docs / Deploy / version-bump / ...`.
+
+**The coordinator only cares about two things:**
+
+1. **Bump PRs merged** -- both staging and prod `[bump] ... <sha>` PRs are `MERGED`.
+2. **Prod version-bump deploy succeeded** for that SHA. A **failed staging** version-bump deploy **blocks** this -- report staging failure immediately and do not treat prod as done.
+
+Ignore unrelated workflows (edge, AI enrich, zizmor, dependabot, assembler ingest, link-index) unless the user asks. Do not wait on staging **success** once prod has succeeded, as long as staging did not **fail**.
+
+```bash
+gh pr list -R elastic/docs-internal-workflows --state all \
+  --search "[bump] docs-builder configuration: <sha>" \
+  --json number,title,state,mergedAt,url
+gh run list -R elastic/docs-internal-workflows --limit 20 \
+  --json name,conclusion,status,displayTitle,url,databaseId,createdAt
+```
+
+Match runs by `version-bump` in the name plus timing after the bump PR merge. Cache bump PR numbers and run IDs in session state.
+
+When prod version-bump is `completed/success` and staging did not fail: "Prod deploy succeeded for <sha>."
+
+**Do not consider sending "docs are live" / "docs released" Slack** until **both** are true:
+
+1. All **blocking** RN PRs are merged (skip only N/A / No changes).
+2. Prod version-bump deploy succeeded (staging did not fail).
+
+Until both are true, do not draft those messages, do not ask "ready to send?", and do not check the website-confirm or `#mission-control` boxes.
+
+Once both are true: ask the user to **eyeball the website**, then follow §6.5. The visual check is still required before sending.
+
 ### Propose actions
 
 Summarize state and propose next actions. Pattern:
 
 - **Pre-release:** "[X/Y] RN PRs merged. Waiting on: [products]. Coordinator PRs: [status]."
 - **Release day (build declared):** "Release build declared. Waiting for 'begin publishing' signal. [thread link]"
-- **Release day (begin publishing):** "Ready to publish. [RC] gave go at [time]. [thread link]. Confirm docs are live?"
-- **All published:** "All versions published. Ready to send 'docs released' to #docs?"
+- **Release day (begin publishing):** "Ready to publish. [RC] gave go at [time]. [thread link]."
+- **After docs-builder merge:** "Bump PRs: [merged/open]. Prod deploy: [queued/in progress/success/failed]. Staging: [status] (blocks only if failed). RN PRs: [X/Y merged]."
+- **Gate met, not yet announced:** "All blocking RN PRs merged + prod version-bump done. Eyeball the site, then we can send 'docs are live'."
+- **Announced:** "Docs live messages sent."
 
 ---
 
@@ -205,8 +307,9 @@ Match by checklist wording, not by assuming one template. Typical mappings:
 | Merge-RN `#docs` ping sent | Post in #docs ... they can merge their release note PRs |
 | Docs-eng ping that release started | Let the Docs engineering point person know that the release process has started |
 | Coordinator PR merged | Merge the docs-builder config PR (or the 8.x equivalent) |
-| User confirmed docs live | Confirm that the updated docs appear on the website |
-| `#mission-control` "docs are live" reply | Post in #mission-control that the docs are live |
+| Prod version-bump deploy succeeded | Docs engineering "Update the version in staging and production" -- check only after §0.3 prod deploy success (staging did not fail) |
+| User confirmed website eyeball | Confirm that the updated docs appear on the website -- only after the RN+prod gate, and only after the user says the site looks right |
+| `#mission-control` "docs are live" reply | Post in #mission-control that the docs are live -- only after the RN+prod gate **and** website eyeball; still confirm before sending Slack |
 
 **Fetch -> edit -> push**
 
@@ -265,7 +368,7 @@ gh issue view <N> -R elastic/dev --json title,url,body -q .
 | **Feature freeze** / merge-by dates | Overview bullets |
 | **Link to this issue** | `url` from JSON or `https://github.com/elastic/dev/issues/<N>` |
 | Who to ping (by product) | **Release notes** table: `Product` + `Stakeholder` -- map each row to Slack mentions |
-| RN PR status | Same table, **Pull Request** column: no URL = **outstanding**; URL present = filed; "No changes" / "N/A" = **skip**. Products that rarely have changes (e.g. Elasticsearch Hadoop, Fleet & Agent) are **non-blocking** — ping with a hedge ("if applicable") but don't wait on them for the "all merged" gate. |
+| RN PR status | Same table, **Pull Request** column: no URL = **outstanding**; URL present = filed; "No changes" / "N/A" = **skip**. A row with a PR URL is blocking until merged. Do not mark Fleet, Agent, or any other product non-blocking by name.
 
 **Grouping pings:** 8.x and 9.x issues often have **different product rows**. Use **separate** "Ping for ..." sections when tables differ; **merge** duplicate product lines when the same stakeholders apply to multiple versions.
 
@@ -304,29 +407,44 @@ All Slack messages go through this flow:
 - **Links:** Use `<URL|display text>` (e.g. `<https://github.com/elastic/dev/issues/3600|tracking issue>`). Markdown `[text](url)` does NOT render.
 - **Bold:** `*bold*` (not `**bold**`). **Italic:** `_italic_`. **Strikethrough:** `~text~`.
 
-To thread: find the original FF announcement `message_ts` from the channel (use `slack_read_channel` or `slack_search_public` for the version number in `#docs`), then send with `thread_ts` set to that timestamp.
+To thread: use `docsFfThreadTs` from session state if present. Otherwise find the original FF announcement `message_ts` from the channel (use `slack_read_channel` or `slack_search_public` for the version number in `#docs`), then send with `thread_ts` set to that timestamp. Write the ts back to session state.
 
 ### 6.5 Replying in #mission-control threads (release day)
 
-When the user confirms docs are live:
+Do not enter this section until **both** are true: all blocking RN PRs merged, and prod version-bump succeeded. If either is false, say what is still outstanding and stop -- do not draft live/released messages.
 
-1. Find the "begin publishing" message for that version in `#mission-control` (from §0 status check -- note the `message_ts`).
-2. Reply in thread: `slack_send_message` with `thread_ts` set to that message's timestamp. Content: "X.Y.Z docs are live."
-3. Check the matching docs-issue items (§4): confirm docs appear, and post in #mission-control that the docs are live.
-4. Then draft + send the `#docs` "docs released" message via the confirmation flow above.
+Once the gate is met:
+
+1. Ask the user to eyeball the website (9.x current docs / release notes for this version).
+2. After they confirm the site looks right: check the "docs appear on the website" issue box (§4). Draft the `#mission-control` thread reply (`X.Y.Z docs are live.`) and the `#docs` "docs released" ping. Show both; send only with confirmation.
+3. On confirm: reply in the begin-publishing thread (`thread_ts` from §0), send the `#docs` ping (§6.4), and check the `#mission-control` box.
 
 ---
 
-## 7. Background PR poller (in-session)
+## 7. Background poller (in-session)
 
-When the user says "watch the PRs" or "let me know when they're all merged":
+When the user says "watch the PRs", "watch the deploy", or "let me know when they're all merged":
 
-1. Extract all RN PR URLs from the dev issue table.
+### 7.1 Release-note PRs
+
+1. Extract blocking RN PR URLs from the dev issue table (skip N/A / No changes only).
 2. Start a background shell (`block_until_ms: 0`) that loops every 5 minutes, running `gh pr view <url> --json state -q .state` for each URL.
 3. When all return `MERGED`, emit `ALL_RN_PRS_MERGED` (use `notify_on_output` with that pattern).
-4. On notification, report: "All RN PRs are merged. Ready to check prod and confirm docs are live."
+4. On notification, report: "All RN PRs are merged." Persist updated merge state to the session file.
 
-**Limitation:** Only runs within the current session. On next session, re-run §0 instead.
+### 7.2 docs-internal-workflows deploys
+
+After the docs-builder coordinator PR is merged (or when the user asks to watch deploys):
+
+1. Resolve the config SHA (merge commit of the docs-builder PR) and the staging/prod bump PRs + version-bump run IDs (§0.3). Prefer session state.
+2. Poll `gh run view <id>` every 30s. Emit:
+   - `DEPLOY_STAGING_FAILED` -- staging version-bump failed (blocks; alert immediately)
+   - `DEPLOY_PROD_FAILED` -- prod version-bump failed
+   - `DEPLOY_PROD_DONE` -- prod version-bump `completed/success` and staging did not fail
+3. On `DEPLOY_PROD_DONE`, report: "Prod deploy succeeded." If blocking RN PRs are still open, list them -- do not offer live/released Slack yet. If they are all merged, ask the user to eyeball the site, then §6.5.
+4. Write run IDs and conclusions to session state.
+
+**Limitation:** Pollers only run within the current session. On next session, load session state and re-run §0 (fast path) instead of rediscovering.
 
 ---
 
@@ -351,6 +469,7 @@ When the user says "watch the PRs" or "let me know when they're all merged":
 | **Lower-line issue** | Lower semver 9.x same GA -- RNs here; config steps supersede to canonical. |
 | **GA / FF** | Dates on the docs release issue, eng release issue, or from the user per the global rule. |
 | **RC** | Release coordinator for the eng release (varies each release -- read from `#mission-control` coordination thread or eng issue). |
+| **Session state** | Local JSON cache at `~/.elastic-docs/stack-release-state.json` -- IDs only; live status is always refreshed. |
 
 **Roles:** Docs coordinator (you) opens PRs and edits dev issues. **Docs engineering** merges docs-builder, releases, deploy bumps -- coordinate with them; don't assume you merge unless agreed. **RC** (release coordinator) is identified from `#mission-control` -- never hardcode a name.
 
@@ -358,16 +477,18 @@ When the user says "watch the PRs" or "let me know when they're all merged":
 
 ## Agent execution order
 
-0. **Check status** (every invocation when versions/issues are known):
-   - GitHub: existing coordinator PRs, issue checkbox state, RN PR merge status.
+0. **Check status** (every invocation when versions/issues are known, including from session state):
+   - Load `~/.elastic-docs/stack-release-state.json` (§0.1); fall back to scratch if unusable.
+   - GitHub: existing coordinator PRs, issue checkbox state, RN PR merge status (URL present = blocking).
    - `#mission-control` (release day): coordination thread, "release build declared", "begin publishing".
-   - Summarize state, propose next actions.
+   - After docs-builder merge: bump PRs + prod version-bump deploy (§0.3).
+   - Write session state back. Summarize, propose next actions.
 1. Gather inputs (only for what §0 didn't already surface) -> classification table (§2–3).
 2. If same-GA multi 9.x -> identify canonical and plan supersession on lower-line issue.
 3. Open **draft** PRs in schedule order; **9.x minor** = two PRs before marking both steps done.
 4. After **each** skill-flow action (PR, Slack post, merge, docs-live confirm): check the matching checklist item on the docs issue (§4).
 5. **Reminders & messages** (§6): draft via templates, send via Slack MCP (with confirmation), reply in `#mission-control` thread when confirming "docs live", then check the matching boxes.
-6. **PR watch loop** (optional, §7): start background poller if user requests. On next invocation, re-run §0 to pick up new merges.
-7. For anything not specified here (API docs, Buildkite, deploy repo): follow the dev issue checklist and playbooks.
+6. **Watch loops** (optional, §7): RN PRs and/or docs-internal-workflows deploys. On next invocation, §0.1 + §0, not full rediscovery.
+7. For anything not specified here (API docs, Buildkite): follow the dev issue checklist and playbooks.
 
 **Do not assume** calendar dates -- take them from dev issue bodies **or** explicit user input.
