@@ -1,12 +1,13 @@
 ---
 name: docs-stack-release
-version: 1.5.3
+version: 1.5.4
 description: >-
   Coordinate Elastic Stack docs releases: classify versions, route 8.x vs 9.x
   PRs, edit elastic/dev tracking issues, handle same-GA supersession, draft
   Slack #docs reminders, and watch docs-internal-workflows deploys. Use when
-  coordinating docs releases, checking release status, opening coordinator PRs,
-  editing elastic/dev issues, drafting release reminders, or working with
+  the user says "how's my release", "how's my release doing", or asks for
+  release status; also when coordinating docs releases, opening coordinator
+  PRs, editing elastic/dev issues, drafting release reminders, or working with
   assembler.yml, versions.yml, or conf.yaml.
 argument-hint: <versions and/or issue numbers>
 sources:
@@ -43,6 +44,8 @@ Never put **8.x and 9.x edits in one PR**.
 ## Inputs
 
 `$ARGUMENTS` is a space-separated list of semver versions and/or `elastic/dev` issue numbers (e.g. `9.4.0 9.3.4 8.19.15` or `#1234 #1235` or `1234 1235`). If empty: load session state (§0.1). If it has an **active** release (anticipated date is today, in the last 2 days, or tomorrow), use that. Otherwise ask.
+
+**"How's my release" / "how's my release doing"** (no versions given): treat as empty-args status. Load session state and run §0. Do not ask which version if an active release is in state.
 
 The skill supports partial invocation -- the user may jump directly to reminders (§6), PR creation (§5), or status (§0) without running the full pipeline. Match the user's request to the relevant section.
 
