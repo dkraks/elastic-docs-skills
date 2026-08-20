@@ -56,6 +56,15 @@ The <VERSION_LIST> release has kicked off. If you haven't already, you can merge
 
 Send after docs are live. Include the exact 8.x semver from the issue for the scrape line. If the batch is **9.x-only**, omit the scrape line.
 
+**One version** -- singular; do not use "versions" or "all":
+
+```markdown
+Docs for stack version <VERSION> are released!
+<Slack @mention> you can start scraping the docs for <8.x_VERSION> now
+```
+
+**Multiple versions:**
+
 ```markdown
 Docs for stack versions <VERSION_LIST> are all released!
 <Slack @mention> you can start scraping the docs for <8.x_VERSION> now
