@@ -1,6 +1,6 @@
 ---
 name: docs-stack-release
-version: 1.5.5
+version: 1.5.6
 description: >-
   Coordinate Elastic Stack docs releases: classify versions, route 8.x vs 9.x
   PRs, edit elastic/dev tracking issues, handle same-GA supersession, draft
@@ -200,7 +200,7 @@ When reporting status, always link to the relevant Slack threads so the user can
 
 **Skip this section for 8.x / 7.x.** Those releases do not use `docs-internal-workflows`. Do not search that repo, do not poll bump PRs or version-bump runs, and do not require a "prod version-bump deploy" for 8.x live messages.
 
-**Skip §0.3** when the docs issue already checks the Docs engineering "Update the version in staging and production" line (or equivalent) and cites a successful prod run URL. Do not re-list bump PRs or re-view runs.
+**Skip §0.3** when the docs issue already checks the "Watch for the prod version-bump deploy" line (or equivalent) and cites a successful prod run URL. Do not re-list bump PRs or re-view runs.
 
 For **9.x**, after the `docs-builder` coordinator PR merges **and** that issue line is still unchecked:
 
@@ -322,7 +322,7 @@ Follow **[elastic-stack-v8.md](https://github.com/elastic/docs-content-internal/
 
 **Timing for the versions.yml PR (minors):** Don't open early -- many patch releases happen between FF and GA for a minor. Open when no more patches are expected before your GA (typically 1-2 days before). Check `#mission-control` or ask the user if unsure whether another patch is queued ahead.
 
-Docs engineering merges each PR and releases docs-builder per template; coordinator does **not** substitute one PR for both steps.
+The coordinator merges each docs-builder PR when it is time; bump PRs and deploys are automatic. Do **not** substitute one PR for both post-FF assembler and pre-GA versions.yml steps.
 
 ### Same calendar GA: multiple 9.x (e.g. `9.3.4` + `9.4.0`)
 
@@ -351,9 +351,8 @@ Match by checklist wording, not by assuming one template. Typical mappings:
 | Outstanding-RNs / day-before `#docs` ping sent | Post in #docs to remind ... PRs that have not been opened and/or approved |
 | Coordinator PR opened | Open a PR ... plus the nested versions.yml / assembler.yml / conf.yaml line |
 | Merge-RN `#docs` ping sent | Post in #docs ... they can merge their release note PRs |
-| Docs-eng ping that release started | Let the Docs engineering point person know that the release process has started |
 | Coordinator PR merged | Merge the docs-builder config PR (or the 8.x equivalent) |
-| Prod version-bump deploy succeeded (**9.x only**) | Docs engineering "Update the version in staging and production" -- check only after §0.3 prod deploy success (staging did not fail). **Do not use this line for 8.x.** |
+| Prod version-bump deploy succeeded (**9.x only**) | Watch for the prod version-bump deploy -- check only after §0.3 prod deploy success (staging did not fail). **Do not use this line for 8.x.** |
 | User confirmed website eyeball | Confirm that the updated docs appear on the website -- only after the line-specific gate (§0.3), and only after the user says the site looks right |
 | `#mission-control` "docs are live" reply | Post in #mission-control that the docs are live -- only after the line-specific gate **and** website eyeball; still confirm before sending Slack |
 
@@ -519,7 +518,7 @@ After the **9.x** `docs-builder` coordinator PR is merged (or when the user asks
 | **RC** | Release coordinator for the eng release (varies each release -- read from `#mission-control` coordination thread or eng issue). |
 | **Session state** | Local JSON cache at `~/.elastic-docs/stack-release-state.json` -- IDs only. Live-refresh open work per §0.2; trust checked issue lines that cite URLs. |
 
-**Roles:** Docs coordinator (you) opens PRs and edits dev issues. **Docs engineering** merges docs-builder, releases, deploy bumps -- coordinate with them; don't assume you merge unless agreed. **RC** (release coordinator) is identified from `#mission-control` -- never hardcode a name.
+**Roles:** Docs coordinator (you) opens and merges docs-builder config PRs, watches the prod version-bump in `docs-internal-workflows`, and edits dev issues. Do not wait on docs engineering for 9.x deploys. **RC** (release coordinator) is identified from `#mission-control` -- never hardcode a name.
 
 ---
 
