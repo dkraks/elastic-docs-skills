@@ -1,0 +1,182 @@
+{
+  "skill_name": "docs-review-changelog", 
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Review this changelog with UI formatting issues: title: 'Update Service Inventory to improve **Machine Learning** display' description: 'Changes to Advanced Settings panel'",
+      "expected_output": "Flags UI formatting issues: Service Inventory should be quoted, Machine Learning shouldn't be bolded or quoted (feature name), Advanced Settings panel formatting unclear",
+      "expectations": [
+        "Flags missing quotes on 'Service Inventory' (UI element)",
+        "Flags incorrect quoting of 'Machine Learning' (should be feature name, not quoted)",
+        "Notes uncertainty about 'Advanced Settings panel' formatting",
+        "Includes UI element formatting issues in warnings"
+      ]
+    },
+    {
+      "id": 2,
+      "prompt": "Review changelog with Elastic context issues: title: 'Add support for ESQL queries in Observability' description: 'Enables ESQL functionality for monitoring use cases'", 
+      "expected_output": "Applies Elastic software context to validate ES|QL terminology and Observability product reference",
+      "expectations": [
+        "Notes inconsistent 'ESQL' format (should be 'ES|QL')",
+        "Validates 'Observability' as legitimate Elastic product context", 
+        "Shows software context awareness in terminology checking",
+        "Does not flag legitimate Elastic product references as marketing"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Review changelog when canonical guidance fails to load: title: 'Fix dashboard loading' with repository config not found",
+      "expected_output": "Includes confidence assessment showing failed resource loading and its impact on review accuracy", 
+      "expectations": [
+        "Includes 'Confidence Assessment' section in output",
+        "Shows '✗ Failed' status for canonical guidance or repository config", 
+        "Notes 'Medium' or 'Low' validation confidence due to missing resources",
+        "Explains review limitations due to resource loading failures"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Review changelog with feature prefix pattern: title: 'File upload: Fixes disabling data view creation based on user capabilities'",
+      "expected_output": "Flags feature/app prefix pattern as title standardization issue requiring contextual integration",
+      "expectations": [
+        "Flags 'File upload:' prefix pattern as title standardization issue",
+        "Categorizes under 'Feature/app prefix patterns' warning",
+        "Explains pattern needs contextual integration",
+        "Notes pattern should be handled by fix-changelog skill for solutions"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Review changelog with technical colon usage: title: 'Fix bug with Auth header needing \"Authorization: Bearer <token>\"'",
+      "expected_output": "Correctly does NOT flag technical term as feature prefix, focuses on other potential issues",
+      "expectations": [
+        "Does NOT flag 'Authorization: Bearer' as feature prefix pattern",
+        "Correctly identifies as legitimate technical/API reference",
+        "May flag other issues (YAML quoting, formatting) if present",
+        "Shows understanding of technical vs feature prefix distinction"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Review changelog with multiple title issues including feature prefix: title: 'Dashboard: fixes widget loading bugs'",
+      "expected_output": "Flags both feature prefix pattern AND other title issues (verb form, capitalization)",
+      "expectations": [
+        "Flags 'Dashboard:' as feature/app prefix pattern requiring integration",
+        "Flags verb form issue: 'fixes' should be 'Fix' (base form)",
+        "Notes title standardization issues in systematic order",
+        "Demonstrates comprehensive title pattern checking"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Review changelog: type enhancement, title 'Dashboard widget loading improvements for Discover'",
+      "expected_output": "Flags noun-phrase title missing approved base-form leading verb for declared type",
+      "expectations": [
+        "Flags title does not start with approved base-form verb (noun phrase)",
+        "Notes expected verbs for enhancement type (Improve, Update, Enable, etc.)",
+        "Categorizes under quality warnings, not schema errors",
+        "Does not auto-fix — report only"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Review changelog: title 'Fix routing/serialization/coercion errors in ES|QL'",
+      "expected_output": "Flags slash-separated enumeration in title",
+      "expectations": [
+        "Flags slash-separated list foo/bar/baz pattern in title",
+        "Suggests Oxford comma list or clearer phrasing via fix-changelog",
+        "Does not treat slashes in code paths or URLs as the same issue if clearly technical",
+        "Reports under quality warnings"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Review changelog: title 'Aggs: Fix incorrect bucket counts in date histogram'",
+      "expected_output": "Flags development or feature prefix Aggs: as title standardization issue",
+      "expectations": [
+        "Flags 'Aggs:' prefix in strip-development-labels / prefix patterns",
+        "Also checks ES|QL|DS, GPU codec:, DiskBBQ - style prefixes when present",
+        "Does not confuse legitimate technical colons (Authorization: Bearer) with feature prefixes",
+        "Notes contextual integration needed"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Review changelog: type bug-fix, title 'Repro and fix NPE when building QueryNode', description: 'See PR'",
+      "expected_output": "Flags dev/test language, unexpanded NPE, and internal implementation title",
+      "expectations": [
+        "Flags 'Repro and fix' dev/test phrasing",
+        "Flags unexpanded dev acronym NPE (reference fix-changelog acronym table)",
+        "Flags implementation-focused title (QueryNode, class/method passthrough)",
+        "Flags low-value description 'See PR' when present"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Review changelog: type bug-fix, title 'Default search timeout when cluster is under load'",
+      "expected_output": "Flags bug-fix type with enhancement-style verb Default without Fix",
+      "expectations": [
+        "Flags type-title misalignment: Default/Reserve/Ensure/Close without Fix on bug-fix",
+        "Distinguishes from legitimate enhancement titles with Improve/Update",
+        "Suggests reviewing whether title should start with Fix",
+        "Reports under type-title alignment or quality warnings"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Review changelog with areas: [ES|QL], title 'Add UNION_BY_NAME support for nested queries'. PR linked is test-only refactor with no user-visible change.",
+      "expected_output": "Flags unbackticked ES|QL function token and recommends removal for no user impact",
+      "expectations": [
+        "When areas includes ES|QL, flags unbackticked function token UNION_BY_NAME",
+        "Includes Recommend removal subsection when PR is test-only/refactor-only",
+        "States review never deletes files — report only",
+        "Heuristic fires on test-only/internal refactor signals from PR or description"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Review changelog: type bug-fix, title 'Don't allow runtime fields to shadow fields used in index sort'",
+      "expected_output": "Flags preventive/restrictive framing and negative imperative verb mismatch on bug-fix",
+      "expectations": [
+        "Flags Don't as negative imperative — not an approved leading verb",
+        "Flags preventive/restrictive framing: describes restriction not user-visible failure",
+        "Suggests symptom-first rewrite pattern Fix [symptom] when [condition]",
+        "Notes type-title alignment mismatch for bug-fix without Fix/Resolve/Correct",
+        "Reports under quality warnings, not schema errors"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Review changelog: type bug-fix, title 'Ability to configure custom timeouts for cross-cluster search'",
+      "expected_output": "Flags noun-phrase title missing approved base-form leading verb",
+      "expectations": [
+        "Flags 'Ability to' as noun-phrase or gerund-led title pattern",
+        "Notes title does not start with approved base-form verb for bug-fix (Fix, Resolve, Correct)",
+        "Categorizes under quality warnings",
+        "Does not auto-fix — report only"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Review changelog: type bug-fix, title 'Fix maintenance window name references in monitors', no areas field. PR context mentions Synthetics monitoring as context.",
+      "expected_output": "Flags missing product/surface context in title; does not treat as vague-title-only",
+      "expectations": [
+        "Flags missing product/surface context (especially when there are no areas)",
+        "Notes preferred pattern: [Verb] [change] [in/on/for] [app, page, tab, flyout, or integration]",
+        "Would expect surface like Synthetics monitors from PR context",
+        "Reports under quality warnings, not schema errors"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Review changelog: type bug-fix, title 'Fix Fleet secrets stored inline during package policy bulk create', description: 'Fixed Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.'",
+      "expected_output": "Flags past-tense description; notes third-person present standard (Fixes…)",
+      "expectations": [
+        "Flags past tense Fixed in description",
+        "Notes verb-form split: titles use base-form (Fix); descriptions use third-person present (Fixes)",
+        "Expects Fixes Fleet package policy bulk creation…",
+        "Reports under content quality / quality warnings"
+      ]
+    }
+  ]
+}

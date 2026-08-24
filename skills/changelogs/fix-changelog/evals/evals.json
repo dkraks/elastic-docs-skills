@@ -1,0 +1,197 @@
+{
+  "skill_name": "docs-fix-changelog",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Fix this changelog title that has UI formatting issues: 'Update Service Inventory page for better Machine Learning display'",
+      "expected_output": "Suggestion showing proper UI element formatting with \"Service Inventory\" quoted (UI label) but Machine Learning capitalized (feature name), not quoted",
+      "expectations": [
+        "Suggests quoting 'Service Inventory' as UI element: \"Service Inventory\"",
+        "Suggests capitalizing 'Machine Learning' as feature name (not quoting)",
+        "Includes article: 'the \"Service Inventory\" page'", 
+        "Explains UI vs feature name formatting distinction"
+      ]
+    },
+    {
+      "id": 2, 
+      "prompt": "Fix this changelog where accuracy conflicts with style: Title 'Improve dashboard performance' but PR shows it actually fixes a memory leak bug that was causing crashes",
+      "expected_output": "Suggestion prioritizes accuracy over style, recommending title change to reflect bug fix nature and possibly changing type to bug-fix",
+      "expectations": [
+        "Prioritizes factual accuracy over stylistic preference",
+        "Suggests title reflecting actual fix (memory leak/crashes) not generic improvement",
+        "May suggest type change to bug-fix if behavior was broken",
+        "Explains correctness priority principle in reasoning"
+      ]
+    },
+    {
+      "id": 3,
+      "prompt": "Fix changelog with uncertain formatting: 'Enable Advanced Settings in Kibana for index.refresh_interval configuration'",
+      "expected_output": "Confidence tracking documents uncertainty about 'Advanced Settings' (UI vs feature) and properly formats index.refresh_interval with backticks",
+      "expectations": [
+        "Uses backticks for config parameter: `index.refresh_interval`",
+        "Documents uncertainty about 'Advanced Settings' formatting in confidence section",
+        "Provides rationale for formatting choice made",
+        "Shows enhanced confidence methodology with assumption tracking"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "Fix changelog title with ambiguous acronym: 'fix: KI details flyout pushes page content in dark mode'. No PR context provided.",
+      "expected_output": "Flags 'KI' acronym expansion as uncertain, asks for clarification, and documents acronym uncertainty in confidence section rather than guessing the expansion",
+      "expectations": [
+        "Strips development prefix 'fix:' from title",
+        "Flags 'KI' acronym as requiring clarification rather than expanding to 'knowledge item'",
+        "Documents acronym uncertainty in 'Terminology uncertainties' confidence section",
+        "Asks user to clarify what 'KI' stands for in context request",
+        "References checking docs-flag-jargon-skill patterns for common acronyms",
+        "Shows medium/low confidence for acronym-related suggestions"
+      ]
+    },
+    {
+      "id": 5,
+      "prompt": "Fix changelog with feature prefix: 'File upload: Fixes disabling data view creation based on user capabilities'",
+      "expected_output": "Detects feature/app prefix pattern and suggests contextual integration alternatives using integration templates",
+      "expectations": [
+        "Detects 'File upload:' as feature/app prefix pattern",
+        "Suggests integrated alternative: 'Prevent data view creation in file upload tool without sufficient privileges'",
+        "Uses integration template: '[Feature]: Fix [issue]' → 'Fix [issue] in [feature]'",
+        "Shows high confidence for clear UI component name",
+        "Documents feature prefix suggestion in confidence section"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Fix changelog with technical colon usage: 'Fix bug with Auth header needing \"Authorization: Bearer <token>\"'",
+      "expected_output": "Correctly skips technical term and does NOT flag as feature prefix, focusing on other improvements",
+      "expectations": [
+        "Does NOT flag 'Authorization: Bearer' as feature prefix (correctly classified as API/technical term)",
+        "Focuses on other potential improvements (YAML quoting, formatting)",
+        "Shows understanding of legitimate colon usage patterns",
+        "Does not suggest prefix integration for technical content"
+      ]
+    },
+    {
+      "id": 7,
+      "prompt": "Fix changelog with ambiguous prefix: 'Security: Enable new authentication method'",
+      "expected_output": "Detects potential feature prefix but shows medium confidence due to ambiguous context",
+      "expectations": [
+        "Detects 'Security:' as potential feature prefix",
+        "Suggests integration: 'Enable new authentication method for security'",
+        "Shows medium confidence due to ambiguous feature name",
+        "Documents ambiguity in feature prefix confidence section",
+        "Uses integration template: '[Feature]: Enable [capability]' → 'Enable [capability] for [feature]'"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "Fix changelog title: 'Fix routing/serialization/coercion errors in ES|QL queries'",
+      "expected_output": "Replace slash-separated enumeration with Oxford comma list in suggested title",
+      "expectations": [
+        "Suggests title with Oxford comma list instead of routing/serialization/coercion",
+        "Preserves user-visible meaning (ES|QL query errors)",
+        "Shows high confidence for structural slash-list fix",
+        "Does not over-trim accurate technical context in description if needed"
+      ]
+    },
+    {
+      "id": 9,
+      "prompt": "Fix changelog title: 'Repro and fix UOE in PIT search after upgrade'. PR confirms UnsupportedOperationException on point-in-time searches.",
+      "expected_output": "Strip dev phrasing, expand UOE and PIT per acronym table, user-focused rewrite",
+      "expectations": [
+        "Strips 'Repro and fix' dev language",
+        "Expands UOE to UnsupportedOperationException and PIT to point-in-time per acronym table",
+        "Rewrites to user-visible symptom, not class/method passthrough",
+        "Documents PR-confirmed expansions in confidence section"
+      ]
+    },
+    {
+      "id": 10,
+      "prompt": "Fix changelog: type bug-fix, title 'Default timeout for cross-cluster search requests'",
+      "expected_output": "Rewrite as Fix [what was wrong] for bug-fix type-title alignment",
+      "expectations": [
+        "Flags Default without Fix as bug-fix misalignment",
+        "Suggests rewrite like 'Fix incorrect default timeout for cross-cluster search requests'",
+        "Keeps type bug-fix when PR confirms broken behavior",
+        "Includes type-title alignment in confidence section"
+      ]
+    },
+    {
+      "id": 11,
+      "prompt": "Fix changelog: title 'Fix splitValue nullability coercion when constructing ColorSeries'. PR describes grey inline charts for ES|QL time series.",
+      "expected_output": "User-symptom rewrite using Fix [outcome] [in context] template; optional description for stripped detail",
+      "expectations": [
+        "Suggests user-focused title e.g. grey inline charts for ES|QL queries",
+        "Uses [Fix|Improve|Add] [user-visible outcome] [in context] template",
+        "Suggests optional description when technical detail moved out of title",
+        "High confidence when PR context confirms user symptom"
+      ]
+    },
+    {
+      "id": 12,
+      "prompt": "Fix changelog file with prs: [https://github.com/elastic/elasticsearch/pull/12345]. Fetched PR is test-only Mockito refactor, no user-visible change.",
+      "expected_output": "Recommend delete file, not cosmetic rewrite; required PR fetch before suggesting",
+      "expectations": [
+        "Fetches PR from prs URL before suggesting (required)",
+        "Recommends deleting changelog file for test-only/refactor-only/no user impact",
+        "Does not suggest cosmetic title polish when entry should be removed",
+        "Notes low confidence skip for directory mode auto-apply when applicable"
+      ]
+    },
+    {
+      "id": 13,
+      "prompt": "Fix changelog: areas: [ES|QL], title 'Add JSON_EXTRACT and UNION_BY_NAME functions for nested data'",
+      "expected_output": "Backtick ES|QL function tokens; standardize ES|QL product form",
+      "expectations": [
+        "Adds backticks around JSON_EXTRACT and UNION_BY_NAME when areas includes ES|QL",
+        "Uses ES|QL not ESQL in suggested text",
+        "Keeps GPU, API, HTTP, OTLP uppercase per acronym table",
+        "High confidence for function identifier formatting"
+      ]
+    },
+    {
+      "id": 14,
+      "prompt": "Fix changelog: type bug-fix, title 'Don't allow runtime fields to shadow fields used in index sort'. Issue #149500 title: 'Adding a runtime field that shadows a sorted field causes recovery to fail'.",
+      "expected_output": "Symptom-first rewrite using issue title language; flags preventive framing",
+      "expectations": [
+        "Suggests rewrite like 'Fix shard recovery failures when runtime fields shadow index sort fields'",
+        "Uses issue-title cross-check: recovery failure from issue, not restriction from changelog",
+        "Flags preventive/restrictive framing on bug-fix type",
+        "Keeps type bug-fix when issue confirms prior user-visible failure",
+        "Documents issue context in confidence section"
+      ]
+    },
+    {
+      "id": 15,
+      "prompt": "Fix changelog: type bug-fix, title 'Prevent invalid mappings from being applied during index creation'",
+      "expected_output": "Flags preventive framing; suggests Fix [symptom] when [condition] or type change if no prior failure",
+      "expectations": [
+        "Flags Prevent as preventive/restrictive framing without Fix/Resolve/Correct",
+        "Suggests symptom-first rewrite or enhancement type if no prior user-visible failure",
+        "Includes type-title alignment in confidence section",
+        "Does not false-positive on titles already starting with Fix and including symptoms"
+      ]
+    },
+    {
+      "id": 16,
+      "prompt": "Fix changelog: type bug-fix, title 'Fix maintenance window name references in monitors', no areas field. PR title and body mention Synthetics monitoring as context (e.g. [Synthetics] Support referencing maintenance windows by name in monitors).",
+      "expected_output": "Suggests title with product/surface context from PR; documents PR-derived surface in Confidence section",
+      "expectations": [
+        "Suggests title including Synthetics (e.g. Fix maintenance window name references in Synthetics monitors)",
+        "Uses product/surface extraction from PR context (Step 3), not areas (areas absent)",
+        "Documents PR-derived surface context in Confidence + Assumptions",
+        "Keeps base-form title verb Fix"
+      ]
+    },
+    {
+      "id": 17,
+      "prompt": "Fix changelog: type bug-fix, title 'Fix Fleet secrets stored inline during package policy bulk create', description: 'Fixed Fleet package policy bulk creation so that secrets are stored in the secrets index (respecting the secrets storage setting) instead of inline on the package policy saved object.'",
+      "expected_output": "Rewrites description to third-person present Fixes…; explains title vs description verb-form split",
+      "expectations": [
+        "Suggests description starting with Fixes (not Fixed)",
+        "References verb-form split: title base-form Fix; description third-person present Fixes",
+        "Does not change title verb from Fix to Fixes",
+        "High confidence for routine tense correction"
+      ]
+    }
+  ]
+}

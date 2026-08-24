@@ -1,6 +1,6 @@
 ---
 name: docs-serverless-changelog
-version: 1.0.0
+version: 1.0.1
 description: Convert raw Markdown tool output into Elastic Cloud Serverless changelog format using GitHub PR context and prior Serverless release notes. Use when drafting or editing Serverless changelog entries from release notes generator output.
 argument-hint: <path-to-raw-rn.md>
 disable-model-invocation: true

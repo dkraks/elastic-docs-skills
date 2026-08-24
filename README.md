@@ -19,7 +19,7 @@ Skills are available immediately as `/elastic-docs-skills:<skill-name>`, for exa
 
 ```
 /elastic-docs-skills:docs-check-style
-/elastic-docs-skills:docs-crosslink-validator
+/elastic-docs-skills:docs-applies-to-tagging
 ```
 
 ### Individual skills via npx
@@ -121,7 +121,6 @@ disable-model-invocation: true   # Only runs via /my-skill, not auto-triggered
 argument-hint: [args]            # Hint shown in autocomplete
 allowed-tools: Read, Grep        # Tools the skill can use without asking
 context: fork                    # Run in isolated subagent
-agent: Explore                   # Subagent type
 sources:                         # Upstream URLs for freshness checks
   - https://www.elastic.co/docs/...
 ```
