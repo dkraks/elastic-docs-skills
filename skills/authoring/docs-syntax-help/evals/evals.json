@@ -44,6 +44,28 @@
         "Confirms the syntax is valid or would build successfully",
         "Does NOT suggest restructuring a correctly formed tab-set"
       ]
+    },
+    {
+      "id": 5,
+      "prompt": "How should I link to another page in this repo? The target is ../security/index.md. I also need a link to the Authentication section on /deploy-manage/api-keys.md#authentication.",
+      "expected_output": "Uses [](../security/index.md) for the in-repo page link and explicit link text for the Authentication anchor link. Does not recommend restating the page title as link text.",
+      "expectations": [
+        "Recommends [](../security/index.md) or equivalent empty-bracket auto-generated text for the in-repo page link",
+        "Does NOT recommend restating the target page title as custom link text",
+        "Uses explicit link text for the #authentication anchor, not [](/deploy-manage/api-keys.md#authentication)",
+        "Shows a working example of [](page.md) auto-generated link text"
+      ]
+    },
+    {
+      "id": 6,
+      "prompt": "Is this in-repo link OK? The sentence is: You might want to set up [rules](alerting-rules.md). The H1 of alerting-rules.md is Create and manage alerting rules.",
+      "expected_output": "Allows the custom text 'rules' because it contextualizes the link and does not restate the page title. Would reject [Create and manage alerting rules](alerting-rules.md) in favor of [](alerting-rules.md).",
+      "expectations": [
+        "Accepts [rules](alerting-rules.md) as valid contextual custom link text",
+        "Does NOT require changing 'rules' to auto-generated [](alerting-rules.md)",
+        "Treats [Create and manage alerting rules](alerting-rules.md) as an anti-pattern because it restates the page title",
+        "Would recommend [](alerting-rules.md) when the link text would match the page title"
+      ]
     }
   ]
 }
