@@ -1,6 +1,6 @@
 ---
 name: docs-syntax-help
-version: 1.0.8
+version: 1.1.0
 description: Provide Elastic Docs syntax guidance, troubleshoot markup issues, and help write directives correctly. Use when writing or editing documentation that uses MyST Markdown with Elastic extensions, or when troubleshooting build errors related to syntax.
 argument-hint: <question-or-directive>
 context: fork
@@ -129,19 +129,31 @@ Default anchors auto-generate as lowercase, hyphenated, alphanumeric (diacritics
 
 ## Links
 
-**Internal** (relative or absolute with `.md` extension):
+**In-repo page links**: Default to auto-generated link text (`[](page.md)`). The published label is the target page title.
+
 ```
-[Link text](../path/to/page.md)
-[Link text](/absolute/path/to/page.md#anchor)
+[](../path/to/page.md)
+[](/absolute/path/to/page.md)
 ```
 
-**Same-page anchor**: `[Jump](#section-anchor)`
+Custom link text is allowed when it contextualizes the link. Do not write custom text that restates the page title.
+
+```
+You might want to set up [rules](create-manage-rules.md).
+```
+
+Anti-pattern: `[Create and manage {{kib}} alerting rules](create-manage-rules.md)` when that string is the page title. Write `[](create-manage-rules.md)` instead.
+
+**Anchors**: Do not use auto-generated link text. Write explicit link text for in-repo section links and same-page jumps.
+
+```
+[Link text](/absolute/path/to/page.md#anchor)
+[Jump](#section-anchor)
+```
 
 **Cross-repository**: `[Text](kibana://path/to/page.md)` — link text is **mandatory**; omitting it causes the link to fail.
 
 **External**: `[Text](https://example.com)` — bare `https://` URLs (not `http://`) are automatically converted to clickable links that open in a new tab. Autolinks are not rendered inside code blocks or inline code. Bare URL autolinks pointing to `elastic.co/docs` trigger a build hint to use a cross-repository or relative link instead.
-
-**Auto-generated text** (uses target page title): `[](page.md)` or `[](page.md#section)`
 
 **Reference-style**:
 ```
@@ -573,6 +585,7 @@ Use `* * *` for horizontal rules.
 2. If the user shares broken markup, identify the issue and provide the corrected version.
 3. If the user asks "how do I...", show the relevant syntax pattern with a minimal, copy-pasteable example.
 4. When fixing syntax, explain what was wrong so the user learns the pattern.
-5. For advanced or edge-case questions, consult the reference pages:
+5. When writing or editing docs, default to `[](page.md)` for in-repo links to whole pages. Custom link text is allowed only when it contextualizes the link. Do not restate the page title as link text. Use explicit link text for anchors, cross-repository links, and external links.
+6. For advanced or edge-case questions, consult the reference pages:
    - [Syntax quick reference](https://www.elastic.co/docs/contribute-docs/syntax-quick-reference)
    - [Detailed syntax guide](https://docs-v3-preview.elastic.dev/elastic/docs-builder/tree/main/syntax)
